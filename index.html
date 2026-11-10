@@ -1,0 +1,3529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEMÁFORO DA SEGURANÇA – Trabalho Seguro Ltda.</title>
+  <style>
+    /* ==========================================================================
+       1. ESTILOS GERAIS E TEMA INDUSTRIAL DARK
+       ========================================================================== */
+    :root {
+      --bg-main: #0b0f19;
+      --bg-panel: #111827;
+      --bg-card: rgba(30, 41, 59, 0.75);
+      --border-card: rgba(255, 255, 255, 0.1);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --color-green: #22c55e;
+      --color-green-glow: rgba(34, 197, 94, 0.45);
+      --color-yellow: #facc15;
+      --color-yellow-glow: rgba(250, 204, 21, 0.45);
+      --color-red: #ef4444;
+      --color-red-glow: rgba(239, 68, 68, 0.45);
+      --color-blue: #38bdf8;
+      --color-blue-glow: rgba(56, 189, 248, 0.4);
+      --color-metal: #475569;
+      --color-purple: #c084fc;
+      --color-warning-stripes: repeating-linear-gradient(45deg, #facc15, #facc15 15px, #000 15px, #000 30px);
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      
+      --font-base: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0b0f19 75%, #05070d 100%);
+      color: var(--text-main);
+      font-family: var(--font-base);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid var(--color-blue);
+      outline-offset: 3px;
+    }
+
+    /* ==========================================================================
+       2. TOP BAR & HUD INDUSTRIAL
+       ========================================================================== */
+    header.hud-bar {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid #334155;
+      padding: 10px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .company-logo-svg {
+      width: 44px;
+      height: 44px;
+      filter: drop-shadow(0 0 8px var(--color-blue-glow));
+    }
+
+    .brand-titles h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-titles p {
+      font-size: 0.75rem;
+      color: var(--color-yellow);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .hud-metrics {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .metric-gauge {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 170px;
+    }
+
+    .gauge-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .gauge-track {
+      height: 12px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--color-red) 0%, var(--color-yellow) 50%, var(--color-green) 100%);
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    .technician-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid #475569;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .level-badge {
+      background: var(--color-blue);
+      color: #0f172a;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .combo-indicator {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #f97316;
+      text-shadow: 0 0 8px rgba(249, 115, 22, 0.7);
+      animation: flame-pulse 0.8s infinite alternate;
+    }
+
+    @keyframes flame-pulse {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.12); filter: brightness(1.3); }
+    }
+
+    .lives-indicator {
+      display: flex;
+      gap: 4px;
+      font-size: 1.1rem;
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon-hud {
+      min-height: 42px;
+      min-width: 42px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: var(--text-main);
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-icon-hud:hover {
+      background: #334155;
+      border-color: var(--color-blue);
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================================
+       3. VIEWPORT DE TELAS
+       ========================================================================= */
+    main.app-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .view-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      animation: fadeInView 0.35s ease-out forwards;
+    }
+
+    .view-screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       4. BOTÕES E COMPONENTES
+       ========================================================================== */
+    .btn-industrial {
+      min-height: 56px;
+      padding: 12px 24px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-industrial:active { transform: scale(0.97); }
+
+    .btn-primary-action {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      border-color: #60a5fa;
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+    }
+    .btn-primary-action:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-group-action {
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: #ffffff;
+      border-color: #c084fc;
+      box-shadow: 0 0 20px rgba(147, 51, 234, 0.4);
+    }
+    .btn-group-action:hover {
+      background: linear-gradient(135deg, #9333ea, #a855f7);
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.7);
+      transform: translateY(-2px);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #15803d, #16a34a);
+      color: #ffffff;
+      border-color: #4ade80;
+      box-shadow: 0 0 15px var(--color-green-glow);
+    }
+    .btn-green:hover { background: #22c55e; box-shadow: 0 0 25px var(--color-green-glow); }
+
+    .btn-yellow {
+      background: linear-gradient(135deg, #a16207, #ca8a04);
+      color: #ffffff;
+      border-color: #fde047;
+      box-shadow: 0 0 15px var(--color-yellow-glow);
+    }
+    .btn-yellow:hover { background: #eab308; box-shadow: 0 0 25px var(--color-yellow-glow); }
+
+    .btn-red {
+      background: linear-gradient(135deg, #b91c1c, #dc2626);
+      color: #ffffff;
+      border-color: #f87171;
+      box-shadow: 0 0 15px var(--color-red-glow);
+    }
+    .btn-red:hover { background: #ef4444; box-shadow: 0 0 25px var(--color-red-glow); }
+
+    .btn-secondary {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+    .btn-secondary:hover {
+      background: #334155;
+      border-color: #94a3b8;
+    }
+
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ==========================================================================
+       5. TELA INICIAL
+       ========================================================================== */
+    .hero-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      text-align: center;
+      gap: 24px;
+    }
+
+    .traffic-light-interactive {
+      background: #0f172a;
+      border: 4px solid #334155;
+      padding: 16px;
+      border-radius: 40px;
+      display: flex;
+      gap: 16px;
+      box-shadow: inset 0 4px 12px #000, 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .traffic-lamp {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #1e293b;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    .traffic-lamp.red.lit {
+      background: var(--color-red);
+      box-shadow: 0 0 30px var(--color-red), inset 0 0 10px #fff;
+    }
+    .traffic-lamp.yellow.lit {
+      background: var(--color-yellow);
+      box-shadow: 0 0 30px var(--color-yellow), inset 0 0 10px #fff;
+    }
+    .traffic-lamp.green.lit {
+      background: var(--color-green);
+      box-shadow: 0 0 30px var(--color-green), inset 0 0 10px #fff;
+    }
+
+    .hero-title-group h2 {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(180deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .hero-title-group p {
+      font-size: 1.15rem;
+      color: var(--color-blue);
+      font-weight: 600;
+    }
+
+    .name-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .name-input-group input {
+      min-height: 56px;
+      padding: 0 20px;
+      border-radius: var(--radius-md);
+      background: #0f172a;
+      border: 2px solid #334155;
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+
+    .name-input-group input:focus { border-color: var(--color-blue); }
+
+    .hero-play-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .hero-menu-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    /* ==========================================================================
+       6. MAPA DO TURNO
+       ========================================================================== */
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .map-header h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .plant-layout-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .sector-card {
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .sector-card:hover {
+      border-color: var(--color-blue);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px var(--color-blue-glow);
+    }
+
+    .sector-card.completed { border-color: var(--color-green); }
+
+    .sector-card.completed::after {
+      content: "CARIMBADO ✓";
+      position: absolute;
+      top: 18px;
+      right: -28px;
+      background: var(--color-green);
+      color: #052e16;
+      font-weight: 900;
+      font-size: 0.65rem;
+      padding: 4px 30px;
+      transform: rotate(35deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .sector-card.locked {
+      opacity: 0.55;
+      filter: grayscale(0.8);
+      cursor: not-allowed;
+      border-color: #475569;
+    }
+
+    .sector-icon-svg {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      background: #1e293b;
+      padding: 8px;
+      border: 1px solid #334155;
+    }
+
+    .sector-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 4px;
+    }
+
+    .sector-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .sector-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--color-yellow);
+      font-weight: 700;
+      border-top: 1px solid #1f2937;
+      padding-top: 10px;
+    }
+
+    /* ==========================================================================
+       7. ESTEIRA RELÂMPAGO
+       ========================================================================== */
+    .conveyor-arena {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .conveyor-track {
+      width: 100%;
+      max-width: 800px;
+      height: 280px;
+      background: #0f172a;
+      border: 3px solid #334155;
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 25px #000;
+    }
+
+    .conveyor-belts-visual {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 24px;
+      background: var(--color-warning-stripes);
+      opacity: 0.8;
+      animation: conveyorMove 1.5s linear infinite;
+    }
+
+    @keyframes conveyorMove {
+      from { background-position: 0 0; }
+      to { background-position: 60px 0; }
+    }
+
+    .sliding-scene-box {
+      width: 90%;
+      max-width: 580px;
+      height: 220px;
+      background: #1e293b;
+      border: 2px solid var(--color-blue);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+      animation: sceneSlideIn 0.3s ease-out;
+    }
+
+    @keyframes sceneSlideIn {
+      from { transform: scale(0.9) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .lightning-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* ==========================================================================
+       8. DETETIVE DE ACIDENTE
+       ========================================================================== */
+    .detective-workbench {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 900px) {
+      .detective-workbench { grid-template-columns: 1fr; }
+    }
+
+    .accident-scene-interactive {
+      position: relative;
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: var(--radius-lg);
+      min-height: 420px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clue-hotspot {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.3);
+      border: 2px dashed var(--color-yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      animation: cluePulse 1.8s infinite;
+      transition: all 0.2s;
+    }
+
+    .clue-hotspot:hover {
+      background: var(--color-yellow);
+      color: #000;
+      transform: scale(1.15);
+    }
+
+    @keyframes cluePulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 14px rgba(250, 204, 21, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+    }
+
+    .cause-tree-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .tree-step-card {
+      background: #111827;
+      border: 1px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+
+    .tree-step-card h4 {
+      font-size: 0.9rem;
+      color: var(--color-blue);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ==========================================================================
+       9. CAÇA COM LANTERNA
+       ========================================================================== */
+    .flashlight-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      height: 480px;
+      background: #020617;
+      border: 3px solid #334155;
+      border-radius: var(--radius-lg);
+      margin: 0 auto;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    .darkness-curtain {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      background: radial-gradient(circle 120px at var(--light-x, 50%) var(--light-y, 50%), transparent 0%, rgba(2, 6, 23, 0.97) 120px);
+      z-index: 20;
+    }
+
+    .flashlight-scene-content {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    .hidden-hazard-target {
+      position: absolute;
+      width: 60px; height: 60px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: outline 0.15s;
+    }
+
+    .hidden-hazard-target:hover { outline: 2px dashed var(--color-yellow); }
+
+    .battery-bar-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 12px auto 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ==========================================================================
+       10. ARMÁRIO DE EPIS (EXPANDIDO: 24 ITENS + MÚLTIPLAS ORDENS DE SERVIÇO)
+       ========================================================================== */
+    .wardrobe-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    @media (max-width: 950px) {
+      .wardrobe-layout { grid-template-columns: 1fr; }
+    }
+
+    .avatar-mannequin-box {
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+
+    .mannequin-visual {
+      width: 250px;
+      height: 380px;
+      background: #1e293b;
+      border-radius: var(--radius-md);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #475569;
+      overflow: hidden;
+    }
+
+    .equipped-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-width: 100%;
+      min-height: 50px;
+    }
+
+    .equipped-tag {
+      background: var(--color-blue);
+      color: #042f2e;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .equipped-tag:hover {
+      background: var(--color-red);
+      color: #fff;
+    }
+
+    .wardrobe-shelf {
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .wardrobe-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: var(--text-muted);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--color-blue);
+      color: #0f172a;
+      border-color: var(--color-blue);
+    }
+
+    .os-selector-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: #0f172a;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      border: 1px solid #334155;
+    }
+
+    .os-btn {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f1f5f9;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .os-btn.active {
+      background: var(--color-yellow);
+      color: #000;
+      border-color: #fde047;
+    }
+
+    .epi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .epi-card-item {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 100px;
+      justify-content: center;
+    }
+
+    .epi-card-item:hover {
+      border-color: var(--color-blue);
+      transform: translateY(-2px);
+    }
+
+    .epi-card-item.selected {
+      border-color: var(--color-green);
+      background: rgba(34, 197, 94, 0.2);
+    }
+
+    /* ==========================================================================
+       11. ÂNCORA DO PROCEDIMENTO
+       ========================================================================== */
+    .procedure-dropzone {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .procedure-step-card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s;
+    }
+
+    .step-reorder-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .btn-step-move {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #fff;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* ==========================================================================
+       12. SALA DE CRISE
+       ========================================================================== */
+    .crisis-scene-monitor {
+      background: #090d16;
+      border: 3px solid var(--color-red);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 30px var(--color-red-glow);
+    }
+
+    .crisis-alarm-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(239, 68, 68, 0.15);
+      pointer-events: none;
+      animation: redAlertPulse 1s infinite alternate;
+    }
+
+    @keyframes redAlertPulse {
+      0% { opacity: 0.1; }
+      100% { opacity: 0.6; }
+    }
+
+    .lives-at-risk-gauge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-red);
+    }
+
+    /* ==========================================================================
+       13. ARENA DE EQUIPES (JOGO EM GRUPO COMPLETO)
+       ========================================================================== */
+    .arena-teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .team-stand-card {
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+      position: relative;
+    }
+
+    .team-color-indicator {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .team-bet-selector {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .team-vote-status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .group-setup-box {
+      background: #0f172a;
+      border: 2px solid #334155;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Pódio Final da Arena */
+    .podium-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 16px;
+      min-height: 220px;
+      margin: 20px 0;
+    }
+
+    .podium-pillar {
+      width: 130px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      position: relative;
+    }
+
+    .podium-1 { height: 180px; background: linear-gradient(180deg, #facc15, #ca8a04); color: #000; }
+    .podium-2 { height: 140px; background: linear-gradient(180deg, #94a3b8, #64748b); color: #000; }
+    .podium-3 { height: 100px; background: linear-gradient(180deg, #d97706, #78350f); color: #fff; }
+
+    /* ==========================================================================
+       14. MODAL DE FEEDBACK
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      animation: fadeInModal 0.25s ease-out;
+    }
+
+    .modal-backdrop.active { display: flex; }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-dialog-industrial {
+      background: #111827;
+      border: 2px solid #334155;
+      border-radius: var(--radius-lg);
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      position: relative;
+    }
+
+    .modal-header-strip {
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .modal-header-strip.success {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--color-green);
+      color: var(--color-green);
+    }
+
+    .modal-header-strip.danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--color-red);
+      color: var(--color-red);
+    }
+
+    .modal-body-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .explanation-block {
+      background: #0f172a;
+      border-left: 4px solid var(--color-blue);
+      padding: 12px 16px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .nr-pill-tag {
+      background: #334155;
+      color: var(--color-yellow);
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      display: inline-block;
+    }
+
+    /* ==========================================================================
+       15. TELA FINAL
+       ========================================================================== */
+    .final-turn-box {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .medal-award-visual {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto;
+      filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.6));
+    }
+
+    .mandatory-safety-quote {
+      background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), rgba(250, 204, 21, 0.2), rgba(34, 197, 94, 0.2));
+      border: 2px solid var(--color-yellow);
+      border-radius: var(--radius-md);
+      padding: 18px 24px;
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+    }
+
+    #fx-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .shake-animation {
+      animation: screenShake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes screenShake {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(5px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+      40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="fx-canvas"></canvas>
+
+  <header class="hud-bar" role="banner">
+    <div class="brand-section" onclick="GameApp.navigate('map')" title="Voltar ao Mapa da Fábrica" tabindex="0">
+      <svg class="company-logo-svg" viewBox="0 0 100 100">
+        <polygon points="50,5 95,25 95,75 50,95 5,75 5,25" fill="#1e293b" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="50" cy="30" r="10" fill="#ef4444"/>
+        <circle cx="50" cy="50" r="10" fill="#facc15"/>
+        <circle cx="50" cy="70" r="10" fill="#22c55e"/>
+      </svg>
+      <div class="brand-titles">
+        <h1>TRABALHO SEGURO LTDA.</h1>
+        <p>SEMÁFORO DA SEGURANÇA • GESTÃO DE RISCO</p>
+      </div>
+    </div>
+
+    <div class="hud-metrics">
+      <div class="metric-gauge" title="Índice de Segurança da Empresa">
+        <div class="gauge-header">
+          <span>Índice Segurança</span>
+          <span id="hud-safety-pct">100%</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-fill" id="hud-safety-fill"></div>
+        </div>
+      </div>
+
+      <div class="technician-pill" onclick="GameApp.openBadgeModal()" title="Ver Crachá e Conquistas" tabindex="0" role="button">
+        <span>🪪 <strong id="hud-user-name">Técnico</strong></span>
+        <span class="level-badge" id="hud-user-level">Estagiário</span>
+        <span style="color:var(--color-yellow);">⭐ <span id="hud-user-xp">0 XP</span></span>
+      </div>
+
+      <div class="combo-indicator" id="hud-combo-tag">
+        🔥 <span id="hud-combo-val">0</span>x COMBO!
+      </div>
+
+      <div class="lives-indicator" id="hud-lives-container" title="Vidas disponíveis">
+        <span id="life-1">❤️</span>
+        <span id="life-2">❤️</span>
+        <span id="life-3">❤️</span>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <button class="btn-icon-hud" id="btn-powerup-hint" onclick="GameApp.usePowerUp('hint')" title="Power-up: Dica técnica (2 restantes)" aria-label="Usar Dica">💡</button>
+      <button class="btn-icon-hud" id="btn-powerup-skip" onclick="GameApp.usePowerUp('skip')" title="Power-up: Pular situação (1 restante)" aria-label="Pular Situação">⏭️</button>
+      <button class="btn-icon-hud" id="btn-powerup-shield" onclick="GameApp.usePowerUp('shield')" title="Power-up: Escudo de erro (1 restante)" aria-label="Ativar Escudo">🛡️</button>
+      
+      <button class="btn-icon-hud" id="btn-audio-toggle" onclick="AudioFX.toggleMute()" title="Ativar/Mudar Áudio" aria-label="Alternar Som">🔊</button>
+      <button class="btn-icon-hud" onclick="GameApp.openTeacherMode()" title="Modo Professor (Gabarito & Filtros)" aria-label="Modo Professor">🎓</button>
+      <button class="btn-icon-hud" onclick="GameApp.navigate('map')" title="Mapa da Fábrica" aria-label="Ir ao Mapa">🗺️</button>
+    </div>
+  </header>
+
+  <main class="app-viewport">
+
+    <!-- 1. TELA INICIAL (COM OPÇÃO DE JOGO INDIVIDUAL OU JOGO EM GRUPO) -->
+    <section class="view-screen active" id="view-home">
+      <div class="hero-container">
+        <div class="traffic-light-interactive" aria-hidden="true">
+          <div class="traffic-lamp red lit" id="lamp-red"></div>
+          <div class="traffic-lamp yellow lit" id="lamp-yellow"></div>
+          <div class="traffic-lamp green lit" id="lamp-green"></div>
+        </div>
+
+        <div class="hero-title-group">
+          <h2>SEMÁFORO DA SEGURANÇA</h2>
+          <p>Treinamento Oficial Técnico • Trabalho Seguro Ltda.</p>
+        </div>
+
+        <div class="name-input-group glass-card">
+          <label for="input-tech-name" style="font-weight:700; color:var(--text-muted); font-size:0.9rem;">
+            IDENTIFICAÇÃO DO TÉCNICO DE SEGURANÇA
+          </label>
+          <input type="text" id="input-tech-name" placeholder="Digite seu nome..." maxlength="24" value="Técnico Prevenção">
+          
+          <div class="hero-play-buttons">
+            <button class="btn-industrial btn-primary-action" onclick="GameApp.startShift()">
+              🚦 INICIAR TURNO INDIVIDUAL
+            </button>
+            <button class="btn-industrial btn-group-action" onclick="GameApp.startGroupMode()">
+              👥 JOGO EM GRUPO (ARENA DE EQUIPES)
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-menu-grid">
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openHelpModal()">📖 Como Jogar</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openBadgeModal()">🪪 Crachá e Conquistas</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openRankingModal()">🏆 Ranking da Fábrica</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openTeacherMode()">🎓 Modo Professor</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. MAPA DO TURNO -->
+    <section class="view-screen" id="view-map">
+      <div class="map-header">
+        <div>
+          <h2>🗺️ Planta da Fábrica – Ordem de Serviço</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem;">
+            Selecione qualquer setor para iniciar a inspeção técnica. Complete 4 modalidades para desbloquear a Auditoria Final!
+          </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-industrial btn-group-action" onclick="GameApp.startGroupMode()" style="min-height:48px; padding:8px 16px; font-size:0.85rem;">
+            👥 Jogo em Grupo
+          </button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openBadgeModal()" style="min-height:48px; padding:8px 16px; font-size:0.85rem;">
+            ⭐ Ver Meu Crachá
+          </button>
+        </div>
+      </div>
+
+      <div class="plant-layout-grid" id="factory-sectors-grid"></div>
+    </section>
+
+    <!-- 3. MODALIDADE 1: SEMÁFORO RELÂMPAGO -->
+    <section class="view-screen" id="view-mod1">
+      <div class="glass-card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3>⚡ Almoxarifado: Semáforo Relâmpago</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Classifique a situação antes que a esteira pare! Pressione 1, 2 ou 3 no teclado.</p>
+        </div>
+        <div style="font-size:1.1rem; font-weight:800; color:var(--color-yellow);">
+          Pontos: <span id="m1-score">0</span> | Velocidade: <span id="m1-speed">1x</span>
+        </div>
+      </div>
+
+      <div class="conveyor-arena">
+        <div class="conveyor-track">
+          <div class="sliding-scene-box" id="m1-scene-box"></div>
+          <div class="conveyor-belts-visual"></div>
+        </div>
+
+        <div class="lightning-controls">
+          <button class="btn-industrial btn-green" onclick="Modality1.answer('verde')">🟢 [1] SEGURO</button>
+          <button class="btn-industrial btn-yellow" onclick="Modality1.answer('amarelo')">🟡 [2] ATENÇÃO</button>
+          <button class="btn-industrial btn-red" onclick="Modality1.answer('vermelho')">🔴 [3] PERIGO GRAVE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. MODALIDADE 2: DETETIVE DE CENA DO ACIDENTE -->
+    <section class="view-screen" id="view-mod2">
+      <div class="glass-card" style="margin-bottom:16px;">
+        <h3>🕵️ Linha de Produção: Investigação do Acidente</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Clique nos pontos de evidência na cena e construa a Árvore de Causas.</p>
+      </div>
+
+      <div class="detective-workbench">
+        <div class="accident-scene-interactive" id="m2-scene-container"></div>
+        <div class="cause-tree-panel glass-card">
+          <h3 style="color:var(--color-yellow); font-size:1.1rem; margin-bottom:10px;">📋 Árvore de Causas & Medidas</h3>
+          <div class="tree-step-card">
+            <h4>1. Pistas Coletadas (<span id="m2-clues-count">0</span>/4)</h4>
+            <div id="m2-clues-list" style="font-size:0.8rem; color:var(--text-muted);">Clique nos pontos destacados da cena ao lado...</div>
+          </div>
+          <div class="tree-step-card">
+            <h4>2. Causa Imediata</h4>
+            <select id="m2-immediate-cause" style="width:100%; min-height:44px; background:#0f172a; color:#fff; border:1px solid #475569; border-radius:6px; padding:0 10px;">
+              <option value="">Selecione a causa imediata...</option>
+              <option value="piso_oleo">Piso impregnado de óleo sem contenção nem sinalização</option>
+              <option value="distracao">Trabalhador simplesmente tropeçou por distração pessoal</option>
+              <option value="calçado_invalido">Calçado de passeio sem solado antiderrapante em área industrial</option>
+            </select>
+          </div>
+          <div class="tree-step-card">
+            <h4>3. Causa Raiz (Fator Organizacional)</h4>
+            <select id="m2-root-cause" style="width:100%; min-height:44px; background:#0f172a; color:#fff; border:1px solid #475569; border-radius:6px; padding:0 10px;">
+              <option value="">Selecione a causa raiz...</option>
+              <option value="manutencao_falha">Falha no plano de manutenção preventiva e inspeção periódica de vazamentos</option>
+              <option value="azar">Falta de sorte operacional no turno da manhã</option>
+              <option value="falta_advertencia">Ausência de advertência disciplinar ao operário</option>
+            </select>
+          </div>
+          <div class="tree-step-card">
+            <h4>4. Medida de Controle Definitiva</h4>
+            <select id="m2-preventive-action" style="width:100%; min-height:44px; background:#0f172a; color:#fff; border:1px solid #475569; border-radius:6px; padding:0 10px;">
+              <option value="">Selecione a medida preventiva...</option>
+              <option value="epc_manut">Instalar bacia de contenção na máquina, reparar retentores e padronizar rotina 5S</option>
+              <option value="placa_apenas">Apenas colocar uma placa de 'Cuidado' sem consertar o vazamento</option>
+              <option value="trocar_operario">Remanejar o funcionário acidentado para outro setor</option>
+            </select>
+          </div>
+          <button class="btn-industrial btn-primary-action" onclick="Modality2.submitReport()">📑 Emitir Relatório Técnico</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MODALIDADE 3: CAÇA AOS RISCOS COM LANTERNA -->
+    <section class="view-screen" id="view-mod3">
+      <div class="glass-card" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <h3>🔦 Galpão Escuro: Varredura com Lanterna</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Mova a lanterna para achar os perigos! Evite clicar em itens seguros.</p>
+        </div>
+        <div style="font-weight:700; color:var(--color-yellow);">Perigos Encontrados: <span id="m3-hazards-found">0</span> / 5</div>
+      </div>
+
+      <div class="battery-bar-container">
+        <span style="font-weight:800; font-size:0.8rem; text-transform:uppercase;">🔋 Bateria da Lanterna:</span>
+        <div class="gauge-track" style="flex:1;">
+          <div class="gauge-fill" id="m3-battery-fill" style="width:100%; background:var(--color-yellow);"></div>
+        </div>
+      </div>
+
+      <div class="flashlight-viewport" id="m3-viewport">
+        <div class="darkness-curtain" id="m3-darkness"></div>
+        <div class="flashlight-scene-content" id="m3-scene-content"></div>
+      </div>
+    </section>
+
+    <!-- 6. MODALIDADE 4: ARMÁRIO DE EPIS (VESTIÁRIO COM 24 EPIS & SELETOR DE OS) -->
+    <section class="view-screen" id="view-mod4">
+      <div class="glass-card" style="margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:10px;">
+          <div>
+            <h3 id="m4-order-title">🦺 Vestiário: Ordem de Serviço #104 – Soldagem e Esmerilhamento</h3>
+            <p id="m4-order-desc" style="color:var(--text-muted); font-size:0.85rem;">Selecione os EPIs obrigatórios para a atividade no armário industrial abaixo.</p>
+          </div>
+          <div style="font-size:0.8rem; color:var(--color-yellow); font-weight:700;">
+            Selecione uma Ordem de Serviço:
+          </div>
+        </div>
+
+        <!-- Seletor de Ordens de Serviço -->
+        <div class="os-selector-strip" id="m4-os-selectors">
+          <!-- Botões de OS gerados dinamicamente via JS -->
+        </div>
+      </div>
+
+      <div class="wardrobe-layout">
+        <div class="avatar-mannequin-box">
+          <h4 style="color:var(--color-blue); text-transform:uppercase; font-size:0.9rem;">Operário Inspecionado</h4>
+          
+          <!-- Boneco Dinâmico que atualiza conforme os EPIs são vestidos -->
+          <div class="mannequin-visual" id="m4-mannequin-area">
+            <svg viewBox="0 0 100 160" width="100%" height="100%" id="m4-avatar-svg">
+              <!-- Cabeça e Corpo Base -->
+              <circle cx="50" cy="25" r="14" fill="#94a3b8" />
+              <rect x="35" y="42" width="30" height="55" rx="6" fill="#475569" />
+              <rect x="20" y="45" width="12" height="45" rx="4" fill="#334155" />
+              <rect x="68" y="45" width="12" height="45" rx="4" fill="#334155" />
+              <rect x="36" y="100" width="12" height="50" rx="4" fill="#1e293b" />
+              <rect x="52" y="100" width="12" height="50" rx="4" fill="#1e293b" />
+
+              <!-- Camadas Dinâmicas de EPIs sobre o boneco -->
+              <g id="layer-capacete" style="display:none;">
+                <path d="M 33 22 Q 50 6 67 22 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+                <rect x="31" y="21" width="38" height="3" fill="#ca8a04"/>
+              </g>
+              <g id="layer-mascara" style="display:none;">
+                <rect x="42" y="18" width="16" height="15" rx="2" fill="#0f172a" stroke="#38bdf8"/>
+                <rect x="45" y="22" width="10" height="5" fill="#22c55e"/>
+              </g>
+              <g id="layer-oculos" style="display:none;">
+                <rect x="40" y="21" width="9" height="5" rx="1" fill="#38bdf8" opacity="0.8"/>
+                <rect x="51" y="21" width="9" height="5" rx="1" fill="#38bdf8" opacity="0.8"/>
+              </g>
+              <g id="layer-ouvido" style="display:none;">
+                <circle cx="36" cy="25" r="4" fill="#ef4444"/>
+                <circle cx="64" cy="25" r="4" fill="#ef4444"/>
+                <path d="M 36 21 Q 50 14 64 21" fill="none" stroke="#ef4444" stroke-width="2"/>
+              </g>
+              <g id="layer-avental" style="display:none;">
+                <polygon points="40,43 60,43 63,95 37,95" fill="#b45309" stroke="#78350f"/>
+              </g>
+              <g id="layer-cinto" style="display:none;">
+                <line x1="38" y1="45" x2="62" y2="95" stroke="#facc15" stroke-width="3"/>
+                <line x1="62" y1="45" x2="38" y2="95" stroke="#facc15" stroke-width="3"/>
+                <circle cx="50" cy="65" r="3" fill="#38bdf8"/>
+              </g>
+              <g id="layer-luvas" style="display:none;">
+                <circle cx="26" cy="90" r="6" fill="#facc15"/>
+                <circle cx="74" cy="90" r="6" fill="#facc15"/>
+              </g>
+              <g id="layer-botas" style="display:none;">
+                <rect x="33" y="142" width="16" height="10" rx="3" fill="#000" stroke="#facc15"/>
+                <rect x="51" y="142" width="16" height="10" rx="3" fill="#000" stroke="#facc15"/>
+              </g>
+            </svg>
+          </div>
+
+          <div style="width:100%;">
+            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-bottom:4px;">ITENS EQUIPADOS (Clique para desequipar):</div>
+            <div class="equipped-tags-list" id="m4-equipped-tags"></div>
+          </div>
+
+          <button class="btn-industrial btn-green" onclick="Modality4.validateKit()" style="width:100%;">
+            ✅ Validar Liberação Técnica da OS
+          </button>
+        </div>
+
+        <div class="wardrobe-shelf">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <h4 style="color:var(--color-yellow); text-transform:uppercase;">Armário de EPIs Disponíveis (<span id="m4-total-count">24</span> itens)</h4>
+            <div class="wardrobe-tabs" id="m4-category-tabs">
+              <button class="tab-btn active" onclick="Modality4.filterCategory('ALL')">Todos (24)</button>
+              <button class="tab-btn" onclick="Modality4.filterCategory('cabeca')">Cabeça & Face</button>
+              <button class="tab-btn" onclick="Modality4.filterCategory('audio_resp')">Ouvido & Respiração</button>
+              <button class="tab-btn" onclick="Modality4.filterCategory('maos')">Luvas & Membros</button>
+              <button class="tab-btn" onclick="Modality4.filterCategory('corpo_pes')">Corpo, Pés & Altura</button>
+            </div>
+          </div>
+
+          <div class="epi-grid" id="m4-shelf-grid">
+            <!-- 24 cartões de EPIs gerados dinamicamente via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. MODALIDADE 5: ÂNCORA DO PROCEDIMENTO -->
+    <section class="view-screen" id="view-mod5">
+      <div class="glass-card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 id="m5-title">⚓ Oficina: Procedimento de Bloqueio e Etiquetagem (LOTO)</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Ordene as etapas na sequência cronológica segura.</p>
+        </div>
+      </div>
+
+      <div class="procedure-dropzone" id="m5-steps-container"></div>
+
+      <div style="text-align:center; margin-top:20px;">
+        <button class="btn-industrial btn-primary-action" onclick="Modality5.validateOrder()">🔒 Confirmar e Travar Procedimento</button>
+      </div>
+    </section>
+
+    <!-- 8. MODALIDADE 6: SALA DE CRISE -->
+    <section class="view-screen" id="view-mod6">
+      <div class="crisis-scene-monitor">
+        <div class="crisis-alarm-overlay"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; position:relative; z-index:2;">
+          <div>
+            <h3 style="color:var(--color-red); font-size:1.4rem;">🚨 Pátio & Docas: EMERGÊNCIA GRAVE EM ANDAMENTO!</h3>
+            <p id="m6-crisis-desc" style="color:#fecaca;">Vazamento massivo de amônia gasosa detectado no compressor. Operador desacordado próximo à válvula!</p>
+          </div>
+          <div class="lives-at-risk-gauge">
+            <span style="font-weight:800; color:var(--color-red);">VIDAS EM RISCO:</span>
+            <span id="m6-lives-meter" style="font-size:1.2rem; font-weight:900; color:var(--color-yellow);">4 Pessoas</span>
+          </div>
+        </div>
+
+        <div style="background:#1e293b; border-radius:var(--radius-md); padding:16px; min-height:180px; margin-bottom:20px; display:flex; align-items:center; justify-content:center; position:relative; z-index:2;" id="m6-scene-svg"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; position:relative; z-index:2;" id="m6-choices-grid"></div>
+      </div>
+    </section>
+
+    <!-- 9. MODALIDADE 7: ARENA DE EQUIPES (JOGO EM GRUPO COMPLETO) -->
+    <section class="view-screen" id="view-mod7">
+      
+      <!-- FASE DE CONFIGURAÇÃO DO JOGO EM GRUPO -->
+      <div id="m7-setup-view" class="group-setup-box glass-card">
+        <div style="text-align:center;">
+          <h2 style="font-size:1.8rem; color:var(--color-purple); font-weight:900;">👥 Arena de Equipes – Configuração</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Treinamento em grupo para sala de aula (2 a 6 equipes com apostas e cartas especiais)</p>
+        </div>
+
+        <div>
+          <label style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">Número de Rodadas:</label>
+          <select id="m7-rounds-count" style="width:100%; min-height:44px; background:#1e293b; color:#fff; border:1px solid #475569; border-radius:6px; padding:0 12px; margin-top:6px; font-weight:700;">
+            <option value="3">3 Rodadas Rápidas</option>
+            <option value="5" selected>5 Rodadas Padrão (Recomendado)</option>
+            <option value="8">8 Rodadas Campeonato</option>
+            <option value="10">10 Rodadas Maratona</option>
+          </select>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <label style="font-weight:700; font-size:0.85rem; color:var(--text-muted);">Equipes Participantes:</label>
+            <button class="btn-step-move" onclick="Modality7.addTeamToSetup()" style="padding:6px 12px;">➕ Adicionar Equipe</button>
+          </div>
+          <div id="m7-setup-teams-list" style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Linhas de equipes configuráveis -->
+          </div>
+        </div>
+
+        <button class="btn-industrial btn-group-action" onclick="Modality7.startMatch()" style="width:100%; margin-top:10px;">
+          ⚔️ INICIAR ARENA DE EQUIPES
+        </button>
+      </div>
+
+      <!-- FASE DA PARTIDA EM ANDAMENTO -->
+      <div id="m7-match-view" style="display:none; flex-direction:column; gap:16px;">
+        <div class="glass-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3>👥 Arena de Equipes: <span id="m7-match-round-tag" style="color:var(--color-yellow);">Rodada 1 de 5</span></h3>
+            <p style="color:var(--text-muted); font-size:0.85rem;">Cada equipe define sua aposta e seu voto. O professor revela a pontuação!</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-industrial btn-secondary" onclick="Modality7.resetSetup()" style="min-height:44px; padding:8px 14px; font-size:0.8rem;">⚙️ Reconfigurar</button>
+            <button class="btn-industrial btn-primary-action" onclick="Modality7.revealRound()" style="min-height:44px; padding:8px 18px; font-size:0.9rem;">🔔 REVELAR GABARITO & PONTUAÇÃO</button>
+          </div>
+        </div>
+
+        <div class="arena-teams-grid" id="m7-teams-container"></div>
+
+        <div class="glass-card" style="text-align:center;">
+          <h4 style="color:var(--color-blue); margin-bottom:8px;">Situação Técnica Inspecionada</h4>
+          <div id="m7-current-scene" style="min-height:180px; display:flex; align-items:center; justify-content:center;"></div>
+        </div>
+      </div>
+
+      <!-- FASE DO PÓDIO FINAL -->
+      <div id="m7-podium-view" class="glass-card" style="display:none; text-align:center;">
+        <h2 style="font-size:2.2rem; color:var(--color-yellow); font-weight:900;">🏆 PÓDIO DOS CAMPEÕES DA SEGURANÇA</h2>
+        <p style="color:var(--color-blue); font-size:1.1rem; margin-bottom:20px;">Classificação Geral das Equipes</p>
+
+        <div class="podium-container" id="m7-podium-pillars">
+          <!-- Pilares do pódio gerados via JS -->
+        </div>
+
+        <div id="m7-final-scoreboard" style="max-width:600px; margin:20px auto 0; text-align:left;">
+          <!-- Tabela de pontos finais -->
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:16px; margin-top:24px; flex-wrap:wrap;">
+          <button class="btn-industrial btn-group-action" onclick="Modality7.resetSetup()">🔄 Nova Partida em Grupo</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.navigate('map')">🗺️ Voltar ao Mapa</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 10. MODALIDADE 8: AUDITORIA FINAL -->
+    <section class="view-screen" id="view-mod8">
+      <div class="glass-card" style="margin-bottom:16px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3>👔 Diretoria: Auditoria Final do Chefe de Segurança</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Avaliação rigorosa de 8 cenários industriais complexos. Nota mínima 80/100 para aprovação Master!</p>
+        </div>
+        <div style="font-weight:800; color:var(--color-yellow);">
+          Questão <span id="m8-step-num">1</span> de 8 | Pontuação: <span id="m8-current-score">0</span>
+        </div>
+      </div>
+
+      <div class="glass-card" style="text-align:center;">
+        <div id="m8-scene-box" style="min-height:240px; display:flex; align-items:center; justify-content:center; margin-bottom:16px;"></div>
+        <h4 id="m8-scene-title" style="font-size:1.2rem; margin-bottom:8px;">Título do Cenário</h4>
+        <p id="m8-scene-desc" style="color:var(--text-muted); margin-bottom:20px; max-width:600px; margin-left:auto; margin-right:auto;">Descrição técnica...</p>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; max-width:700px; margin:0 auto;">
+          <button class="btn-industrial btn-green" onclick="Modality8.answer('verde')">🟢 CONFORME (Seguro)</button>
+          <button class="btn-industrial btn-yellow" onclick="Modality8.answer('amarelo')">🟡 NÃO CONFORMIDADE LEVE</button>
+          <button class="btn-industrial btn-red" onclick="Modality8.answer('vermelho')">🔴 INTERDIÇÃO / RISCO GRAVE</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. TELA FINAL DO TURNO INDIVIDUAL -->
+    <section class="view-screen" id="view-final">
+      <div class="final-turn-box glass-card">
+        <svg class="medal-award-visual" viewBox="0 0 100 100" id="final-medal-svg">
+          <circle cx="50" cy="50" r="42" fill="#eab308" stroke="#ca8a04" stroke-width="6"/>
+          <polygon points="50,22 57,38 74,40 61,52 65,69 50,60 35,69 39,52 26,40 43,38" fill="#fff"/>
+        </svg>
+
+        <div>
+          <h2 style="font-size:2.2rem; font-weight:900; margin-bottom:6px;" id="final-title">TURNO CONCLUÍDO!</h2>
+          <p style="color:var(--color-blue); font-size:1.1rem;" id="final-subtitle">Relatório Geral da Jornada</p>
+        </div>
+
+        <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:16px; background:#0f172a; padding:18px; border-radius:var(--radius-md);">
+          <div>
+            <div style="color:var(--text-muted); font-size:0.8rem;">PONTUAÇÃO TOTAL</div>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--color-yellow);" id="final-score">0 pts</div>
+          </div>
+          <div>
+            <div style="color:var(--text-muted); font-size:0.8rem;">APROVEITAMENTO</div>
+            <div style="font-size:1.8rem; font-weight:900; color:var(--color-green);" id="final-accuracy">100%</div>
+          </div>
+          <div>
+            <div style="color:var(--text-muted); font-size:0.8rem;">TEMPO TOTAL</div>
+            <div style="font-size:1.8rem; font-weight:900; color:#fff;" id="final-time">04:12</div>
+          </div>
+        </div>
+
+        <div class="mandatory-safety-quote">
+          "Segurança não é opção, é responsabilidade de todos!"
+        </div>
+
+        <div style="text-align:left; background:#0b0f19; border:1px solid #334155; border-radius:var(--radius-md); padding:16px;">
+          <h4 style="color:var(--color-yellow); margin-bottom:8px;">📝 Caderno de Revisão e Lições Aprendidas:</h4>
+          <ul id="final-mistakes-list" style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.5;">
+            <li>Nenhuma infração registrada no turno. Excelente postura preventiva!</li>
+          </ul>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+          <button class="btn-industrial btn-primary-action" onclick="GameApp.restartShift()">🔄 Jogar Novamente</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.navigate('map')">🗺️ Voltar ao Mapa</button>
+          <button class="btn-industrial btn-secondary" onclick="GameApp.openRankingModal()">🏆 Ver Ranking</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL DE FEEDBACK EDUCATIVO -->
+  <div class="modal-backdrop" id="modal-feedback" role="dialog" aria-modal="true">
+    <div class="modal-dialog-industrial">
+      <div class="modal-header-strip" id="modal-fb-header">
+        <h3 id="modal-fb-result-title" style="display:flex; align-items:center; gap:8px;"></h3>
+        <span class="nr-pill-tag" id="modal-fb-nr">NR-12</span>
+      </div>
+      <div class="modal-body-content">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:0.85rem; color:var(--text-muted); font-weight:700;">CLASSIFICAÇÃO CORRETA:</span>
+          <span id="modal-fb-badge" style="font-weight:900; font-size:0.9rem; padding:4px 12px; border-radius:var(--radius-full);"></span>
+        </div>
+        <div class="explanation-block">
+          <strong style="color:var(--color-blue); display:block; margin-bottom:4px;">🔍 Por quê?</strong>
+          <span id="modal-fb-why">Explicação detalhada...</span>
+        </div>
+        <div class="explanation-block" style="border-left-color: var(--color-green);">
+          <strong style="color:var(--color-green); display:block; margin-bottom:4px;">🛡️ Atitude Segura:</strong>
+          <span id="modal-fb-attitude">Conduta correta imediata...</span>
+        </div>
+        <div style="background:#1e293b; padding:12px; border-radius:var(--radius-sm); font-size:0.85rem; color:var(--color-yellow);">
+          <strong>💡 Você sabia?</strong>
+          <span id="modal-fb-trivia">Fato ou estatística...</span>
+        </div>
+        <button class="btn-industrial btn-primary-action" id="modal-fb-btn-next" onclick="GameApp.closeFeedback()">PRÓXIMO ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CRACHÁ & CONQUISTAS -->
+  <div class="modal-backdrop" id="modal-badge">
+    <div class="modal-dialog-industrial">
+      <div class="modal-header-strip" style="background:#1e293b; color:#fff;">
+        <h3>🪪 Crachá Oficial do Técnico de Segurança</h3>
+        <button onclick="GameApp.closeModals()" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body-content" style="text-align:center;">
+        <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:12px;">
+          <div style="width:70px; height:70px; border-radius:50%; background:#334155; border:3px solid var(--color-blue); display:flex; align-items:center; justify-content:center; font-size:2rem;">👷</div>
+          <div style="text-align:left;">
+            <h3 id="badge-modal-name">Técnico</h3>
+            <p style="color:var(--color-yellow); font-weight:800;" id="badge-modal-title">Estagiário de Prevenção</p>
+            <p style="font-size:0.8rem; color:var(--text-muted);" id="badge-modal-xp">0 XP Acumulados</p>
+          </div>
+        </div>
+        <h4 style="text-align:left; color:var(--color-blue); margin-top:10px;">🏷️ Carimbos de Setores Concluídos:</h4>
+        <div id="badge-stamps-grid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin:10px 0;"></div>
+        <h4 style="text-align:left; color:var(--color-yellow); margin-top:12px;">🏅 Medalhas & Conquistas Desbloqueáveis:</h4>
+        <div id="badge-achievements-list" style="display:flex; flex-direction:column; gap:8px; text-align:left; max-height:220px; overflow-y:auto;"></div>
+        <button class="btn-industrial btn-secondary" onclick="GameApp.closeModals()" style="margin-top:16px;">Fechar Crachá</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RANKING LOCAL -->
+  <div class="modal-backdrop" id="modal-ranking">
+    <div class="modal-dialog-industrial">
+      <div class="modal-header-strip" style="background:#1e293b; color:#fff;">
+        <h3>🏆 Quadro de Honra da Fábrica (Ranking Top 10)</h3>
+        <button onclick="GameApp.closeModals()" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body-content">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem; text-align:left;">
+          <thead>
+            <tr style="border-bottom:1px solid #334155; color:var(--color-yellow);">
+              <th style="padding:8px;">#</th>
+              <th>Técnico</th>
+              <th>Setor / Modalidade</th>
+              <th>Pontos</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-table-body"></tbody>
+        </table>
+        <button class="btn-industrial btn-secondary" onclick="GameApp.closeModals()" style="margin-top:16px;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL COMO JOGAR -->
+  <div class="modal-backdrop" id="modal-help">
+    <div class="modal-dialog-industrial">
+      <div class="modal-header-strip" style="background:#1e293b; color:#fff;">
+        <h3>📖 Manual de Operações do Jogo</h3>
+        <button onclick="GameApp.closeModals()" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body-content" style="font-size:0.9rem; line-height:1.6; color:#cbd5e1;">
+        <p><strong>🎯 Objetivo:</strong> Percorra os 8 setores da fábrica Trabalho Seguro Ltda., identificando situações Seguras (Verde), Atenção (Amarelo) e Perigo Grave (Vermelho).</p>
+        <p><strong>🚦 Código Semafórico:</strong></p>
+        <ul style="padding-left:20px;">
+          <li><strong style="color:var(--color-green);">🟢 VERDE:</strong> Ambientes conformes, EPIs em uso correto, EPCs ativos e rotas livres.</li>
+          <li><strong style="color:var(--color-yellow);">🟡 AMARELO:</strong> Desvios leves, ferramentas fora do lugar, pisos molhados sem sinalização, extintores com inspeção a vencer.</li>
+          <li><strong style="color:var(--color-red);">🔴 VERMELHO:</strong> Risco iminente de acidente grave/fatal, falta de proteção em máquinas, trabalho em altura sem ancoragem.</li>
+        </ul>
+        <p><strong>👥 Modo em Grupo:</strong> Jogue em sala de aula dividindo os estudantes em equipes com apostas, semáforos individuais e pódio animado.</p>
+        <button class="btn-industrial btn-primary-action" onclick="GameApp.closeModals()">Entendido, Iniciar!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MODO PROFESSOR -->
+  <div class="modal-backdrop" id="modal-teacher">
+    <div class="modal-dialog-industrial" style="max-width:850px;">
+      <div class="modal-header-strip" style="background:#1e293b; color:var(--color-yellow);">
+        <h3>🎓 Painel do Instrutor / Professor (Gabarito Completo)</h3>
+        <button onclick="GameApp.closeModals()" style="background:none; border:none; color:#fff; font-size:1.4rem; cursor:pointer;">&times;</button>
+      </div>
+      <div class="modal-body-content">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+          <label style="font-weight:700;">Filtrar por Categoria:</label>
+          <select id="teacher-filter-cat" onchange="GameApp.renderTeacherTable()" style="background:#0f172a; color:#fff; border:1px solid #475569; padding:4px 8px; border-radius:4px;">
+            <option value="ALL">Todas as Categorias</option>
+            <option value="EPI">EPI (NR-6)</option>
+            <option value="Elétrica">Elétrica (NR-10)</option>
+            <option value="Máquinas">Máquinas (NR-12)</option>
+            <option value="Ergonomia">Ergonomia (NR-17)</option>
+            <option value="Incêndio">Incêndio (NR-23)</option>
+            <option value="Químicos">Químicos (NR-26)</option>
+            <option value="Altura">Altura (NR-35)</option>
+            <option value="Organização">Organização Geral</option>
+          </select>
+        </div>
+
+        <div style="max-height:360px; overflow-y:auto; border:1px solid #334155; border-radius:6px;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:left;">
+            <thead style="background:#0f172a; position:sticky; top:0;">
+              <tr style="border-bottom:1px solid #475569; color:var(--color-blue);">
+                <th style="padding:8px;">ID</th>
+                <th>Título da Situação</th>
+                <th>Categoria</th>
+                <th>Gabarito</th>
+                <th>Norma</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-table-body"></tbody>
+          </table>
+        </div>
+        <button class="btn-industrial btn-secondary" onclick="GameApp.closeModals()" style="margin-top:14px;">Fechar Gabarito</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       WEB AUDIO API COM SÍNTESE INDUSTRIAL
+       ========================================================================== */
+    const AudioFX = {
+      ctx: null,
+      muted: false,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) this.ctx = new AudioContextClass();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggleMute() {
+        this.muted = !this.muted;
+        const btn = document.getElementById('btn-audio-toggle');
+        if (btn) btn.innerText = this.muted ? '🔇' : '🔊';
+      },
+
+      playSuccess() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.18);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      },
+
+      playError() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      },
+
+      playAlarm() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.linearRampToValueAtTime(900, now + 0.15);
+        osc.frequency.linearRampToValueAtTime(600, now + 0.3);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      },
+
+      playFanfare() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const now = this.ctx.currentTime + (idx * 0.12);
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        });
+      },
+
+      playClick() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    };
+
+    /* ==========================================================================
+       BANCO COMPLETO DE SITUAÇÕES (24 RIGOROSAS)
+       ========================================================================== */
+    const SITUATIONS_DB = [
+      // 8 VERDES
+      {
+        id: 'V1', category: 'EPI', difficulty: 1, title: 'Uso Integral de EPIs em Operação Metalúrgica',
+        correct: 'verde', nrRelated: 'NR-6',
+        explanation: 'O operador utiliza capacete com jugular, óculos de segurança com proteção lateral e luvas de vaqueta sem rasgos.',
+        safeAttitude: 'Manter a verificação do CA (Certificado de Aprovação) e higienização periódica.',
+        curiosidade: 'A NR-6 estabelece que o trabalhador é corresponsável pela guarda e conservação do EPI fornecido.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><circle cx="100" cy="50" r="22" fill="#f87171"/><path d="M 72 45 Q 100 20 128 45 Z" fill="#22c55e" stroke="#15803d" stroke-width="2"/><rect x="70" y="44" width="60" height="5" fill="#15803d"/><rect x="85" y="48" width="12" height="7" rx="2" fill="#38bdf8"/><rect x="103" y="48" width="12" height="7" rx="2" fill="#38bdf8"/><circle cx="65" cy="88" r="8" fill="#facc15"/><circle cx="135" cy="88" r="8" fill="#facc15"/><text x="100" y="112" fill="#22c55e" font-size="10" font-weight="bold" text-anchor="middle">EPIs 100% CONFORMES</text></svg>`
+      },
+      {
+        id: 'V2', category: 'Organização', difficulty: 1, title: 'Corredor Industrial Desobstruído e Sinalizado',
+        correct: 'verde', nrRelated: 'NR-26',
+        explanation: 'As faixas de demarcação de piso estão nítidas e a rota de circulação de pedestres está totalmente livre de paletes.',
+        safeAttitude: 'Preservar a desobstrução permanente de vias principais e saídas de emergência.',
+        curiosidade: 'A cor amarela é padronizada pela NR-26 para indicar faixas de circulação e atenção.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><polygon points="50,120 80,0 120,0 150,120" fill="#334155"/><line x1="50" y1="120" x2="80" y2="0" stroke="#facc15" stroke-width="4" stroke-dasharray="8 6"/><line x1="150" y1="120" x2="120" y2="0" stroke="#facc15" stroke-width="4" stroke-dasharray="8 6"/><text x="100" y="70" fill="#22c55e" font-size="12" font-weight="bold" text-anchor="middle">CORREDOR LIVRE</text></svg>`
+      },
+      {
+        id: 'V3', category: 'Incêndio', difficulty: 1, title: 'Extintor Desobstruído e Dentro da Validade',
+        correct: 'verde', nrRelated: 'NR-23',
+        explanation: 'Extintor pressurizado (manômetro no verde), com selo INMETRO atualizado e área demarcada no piso (1m x 1m).',
+        safeAttitude: 'Realizar a inspeção visual mensal documentada em ficha de controle.',
+        curiosidade: 'A demarcação de piso para extintores impede que caixas ou ferramentas sejam empilhadas sob o equipamento.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="60" y="80" width="80" height="35" fill="#ef4444" stroke="#facc15" stroke-width="3"/><rect x="92" y="35" width="16" height="48" rx="5" fill="#ef4444"/><circle cx="100" cy="30" r="5" fill="#94a3b8"/><path d="M 100 35 L 112 45" stroke="#000" stroke-width="3"/><circle cx="95" cy="45" r="3" fill="#22c55e"/></svg>`
+      },
+      {
+        id: 'V4', category: 'Máquinas', difficulty: 2, title: 'Torno Mecânico com Proteção Fixa e Intertravamento',
+        correct: 'verde', nrRelated: 'NR-12',
+        explanation: 'Partes giratórias enclausuradas com policarbonato e microchave de segurança certificada.',
+        safeAttitude: 'Testar os botões de emergência antes do início de cada turno de trabalho.',
+        curiosidade: 'A NR-12 proíbe o uso de chaves comuns de fim de curso que possam ser facilmente burladas.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><rect x="40" y="40" width="120" height="60" fill="#475569" rx="4"/><rect x="70" y="30" width="60" height="40" fill="rgba(56, 189, 248, 0.4)" stroke="#38bdf8" stroke-width="2"/><circle cx="150" cy="50" r="6" fill="#ef4444"/><text x="100" y="112" fill="#22c55e" font-size="10" font-weight="bold" text-anchor="middle">NR-12 CONFORME</text></svg>`
+      },
+      {
+        id: 'V5', category: 'Organização', difficulty: 1, title: 'Bancada de Manutenção Organizada (5S)',
+        correct: 'verde', nrRelated: 'NR-17',
+        explanation: 'Ferramentas manuais limpas, acondicionadas no quadro de sombras, bancada desimpedida e boa iluminação.',
+        safeAttitude: 'Guardar cada ferramenta logo após o término da tarefa de reparo.',
+        curiosidade: 'O programa 5S reduz o estresse cognitivo e elimina 40% das quedas de materiais em oficinas.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="30" y="70" width="140" height="40" fill="#334155"/><rect x="50" y="20" width="100" height="40" fill="#1e293b" stroke="#475569"/><rect x="60" y="30" width="4" height="20" fill="#94a3b8"/><rect x="80" y="30" width="6" height="20" fill="#94a3b8"/><rect x="100" y="30" width="5" height="18" fill="#94a3b8"/><circle cx="130" cy="40" r="6" fill="#facc15"/></svg>`
+      },
+      {
+        id: 'V6', category: 'EPI', difficulty: 2, title: 'Calçado de Segurança Adequado com Biqueira e Solado PU',
+        correct: 'verde', nrRelated: 'NR-6',
+        explanation: 'Bota em couro, sem trincas, biqueira íntegra e solado antiderrapante em área com leve umidade.',
+        safeAttitude: 'Substituir o calçado assim que houver desgaste dos sulcos do solado.',
+        curiosidade: 'A biqueira de composite é mais leve que a de aço e não conduz eletricidade nem calor.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><path d="M 60 40 L 90 40 L 90 70 L 130 70 Q 145 70 145 85 L 145 95 L 60 95 Z" fill="#334155" stroke="#22c55e" stroke-width="2"/><rect x="60" y="90" width="85" height="10" fill="#0f172a"/><text x="100" y="112" fill="#22c55e" font-size="10" font-weight="bold" text-anchor="middle">BIQUEIRA & SOLADO CONFORME</text></svg>`
+      },
+      {
+        id: 'V7', category: 'Máquinas', difficulty: 2, title: 'Operação de Empilhadeira com Cinto e Garfo Rebaixado',
+        correct: 'verde', nrRelated: 'NR-11',
+        explanation: 'Operador habilitado conduz com cinto de segurança afivelado, faróis acesos e garfo a 15 cm do solo.',
+        safeAttitude: 'Acionar a buzina em todos os cruzamentos cegos e pontos de conversão.',
+        curiosidade: 'O cinto na empilhadeira evita que o operador seja esmagado pela estrutura de proteção em caso de tombamento.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="50" y="50" width="70" height="40" fill="#facc15" rx="4"/><rect x="65" y="30" width="30" height="25" fill="none" stroke="#000" stroke-width="3"/><circle cx="65" cy="95" r="10" fill="#334155"/><circle cx="105" cy="95" r="10" fill="#334155"/><path d="M 120 70 L 145 70 L 145 90 L 170 90" fill="none" stroke="#475569" stroke-width="4"/></svg>`
+      },
+      {
+        id: 'V8', category: 'Organização', difficulty: 1, title: 'Piso Seco com Faixa Antiderrapante em Escada',
+        correct: 'verde', nrRelated: 'NR-1',
+        explanation: 'Degraus protegidos com fita de alta abrasão e corrimão contínuo bilateral fixado firmemente.',
+        safeAttitude: 'Subir e descer sempre utilizando a regra dos 3 pontos de apoio.',
+        curiosidade: 'Quedas no mesmo nível representam cerca de 18% de todos os acidentes típicos da indústria.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><path d="M 40 100 L 70 100 L 70 75 L 100 75 L 100 50 L 130 50 L 130 25 L 160 25" fill="none" stroke="#64748b" stroke-width="6"/><line x1="42" y1="98" x2="68" y2="98" stroke="#facc15" stroke-width="3"/><line x1="72" y1="73" x2="98" y2="73" stroke="#facc15" stroke-width="3"/><line x1="102" y1="48" x2="128" y2="48" stroke="#facc15" stroke-width="3"/></svg>`
+      },
+
+      // 8 AMARELAS
+      {
+        id: 'A1', category: 'Organização', difficulty: 1, title: 'Piso Molhado Após Limpeza Sem Placa de Advertência',
+        correct: 'amarelo', nrRelated: 'NR-26',
+        explanation: 'Área recém-higienizada escorregadia, porém sem barreira física ou placa de sinalização de alerta.',
+        safeAttitude: 'Isolar temporariamente a circulação e posicionar imediatamente a placa cavalete.',
+        curiosidade: 'Pisos úmidos reduzem o coeficiente de atrito em mais de 70%, facilitando escorregões violentos.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><ellipse cx="100" cy="75" rx="55" ry="18" fill="rgba(56, 189, 248, 0.4)" stroke="#38bdf8" stroke-width="1.5"/><text x="100" y="45" fill="#facc15" font-size="12" font-weight="bold" text-anchor="middle">⚠️ PISO MOLHADO</text><text x="100" y="110" fill="#94a3b8" font-size="9" text-anchor="middle">Falta placa de sinalização</text></svg>`
+      },
+      {
+        id: 'A2', category: 'Incêndio', difficulty: 2, title: 'Extintor com Vencimento da Carga Expirado no Mês',
+        correct: 'amarelo', nrRelated: 'NR-23',
+        explanation: 'O extintor está desimpedido e com pressão, mas o anel de inspeção indica validade vencida na semana anterior.',
+        safeAttitude: 'Notificar a manutenção e substituir o cilindro por reserva recarregada.',
+        curiosidade: 'O pó químico pressurizado pode empedrar se a inspeção periódica não for realizada anualmente.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><rect x="90" y="30" width="20" height="55" rx="5" fill="#ef4444"/><rect x="93" y="55" width="14" height="16" fill="#facc15"/><text x="100" y="67" fill="#000" font-size="6" font-weight="bold" text-anchor="middle">EXPIRADO</text><text x="100" y="110" fill="#facc15" font-size="10" font-weight="bold" text-anchor="middle">ATENÇÃO: RECARGA VENCIDA</text></svg>`
+      },
+      {
+        id: 'A3', category: 'Organização', difficulty: 1, title: 'Pilha de Caixas de Papelão Desalinhada no Estoque',
+        correct: 'amarelo', nrRelated: 'NR-11',
+        explanation: 'Empilhamento com altura tolerada, mas com inclinação lateral e risco de desabamento se tocado.',
+        safeAttitude: 'Desempilhar imediatamente as fiadas superiores e remontar a amarração.',
+        curiosidade: 'A amarração em cruz ou entrelaçada previne tombamento mesmo sob pequenas vibrações do galpão.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="80" y="80" width="40" height="25" fill="#ca8a04"/><rect x="84" y="56" width="38" height="24" fill="#ca8a04"/><g transform="rotate(8, 88, 32)"><rect x="88" y="32" width="38" height="24" fill="#eab308" stroke="#ca8a04"/></g><text x="100" y="112" fill="#facc15" font-size="9" font-weight="bold" text-anchor="middle">DESALINHAMENTO EM PILHA</text></svg>`
+      },
+      {
+        id: 'A4', category: 'Elétrica', difficulty: 2, title: 'Extensão Elétrica no Chão com Proteção Improvisada',
+        correct: 'amarelo', nrRelated: 'NR-10',
+        explanation: 'Fios íntegros sem cobre exposto, porém estendidos no chão cobertos apenas com fita adesiva comum.',
+        safeAttitude: 'Instalar passador de cabos articulado industrial em borracha ou aéreo.',
+        curiosidade: 'Passar cabos sem canaleta protetora expõe a fiação a danos mecânicos provocados por carrinhos.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><path d="M 20 80 Q 70 70 110 85 T 180 80" fill="none" stroke="#000" stroke-width="4"/><rect x="90" y="75" width="30" height="14" fill="#facc15" opacity="0.8"/><text x="100" y="50" fill="#facc15" font-size="10" font-weight="bold" text-anchor="middle">CABO SEM CANALETA APROVADA</text></svg>`
+      },
+      {
+        id: 'A5', category: 'Organização', difficulty: 1, title: 'Materiais Temporários Espalhados Fora da Baia',
+        correct: 'amarelo', nrRelated: 'NR-1',
+        explanation: 'Peças metálicas depositadas na borda da linha de montagem, estreitando o fluxo dos operários.',
+        safeAttitude: 'Recolher as peças e acondicioná-las em caçambas identificadas.',
+        curiosidade: 'Corredores estreitados aumentam o tempo de evacuação de emergência e geram esbarrões.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="30" y="80" width="20" height="15" fill="#64748b"/><rect x="55" y="85" width="22" height="12" fill="#64748b"/><circle cx="85" cy="90" r="7" fill="#94a3b8"/><text x="120" y="70" fill="#facc15" font-size="11" font-weight="bold">DESORGANIZAÇÃO</text></svg>`
+      },
+      {
+        id: 'A6', category: 'Organização', difficulty: 2, title: 'Sinalização de Risco Desbotada e Ilegível',
+        correct: 'amarelo', nrRelated: 'NR-26',
+        explanation: 'Placa de advertência de substância química desbotada pela exposição ao sol, dificultando leitura.',
+        safeAttitude: 'Substituir a placa por modelo com fotoluminescência e laminação UV.',
+        curiosidade: 'A NR-26 exige que a rotulagem preventiva esteja sempre nítida e no idioma nacional.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><polygon points="100,25 145,95 55,95" fill="#78716c" stroke="#a8a29e" stroke-width="2"/><text x="100" y="80" fill="#57534e" font-size="28" font-weight="bold" text-anchor="middle">!</text><text x="100" y="112" fill="#facc15" font-size="9" text-anchor="middle">PLACA DESBOTADA PELO TEMPO</text></svg>`
+      },
+      {
+        id: 'A7', category: 'Organização', difficulty: 1, title: 'Luminária Queimada em Trecho de Corredor',
+        correct: 'amarelo', nrRelated: 'NR-17',
+        explanation: 'Luminária inoperante gerando penumbra (nível de iluminamento abaixo do estipulado pela NHO-11).',
+        safeAttitude: 'Abrir ordem de manutenção elétrica predial para troca do reator/lâmpada.',
+        curiosidade: 'Iluminação inadequada contribui diretamente para fadiga visual e tropeços.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#090d16"/><rect x="70" y="10" width="60" height="10" fill="#334155"/><line x1="85" y1="20" x2="85" y2="40" stroke="#ef4444" stroke-width="1.5"/><line x1="115" y1="20" x2="115" y2="40" stroke="#ef4444" stroke-width="1.5"/><text x="100" y="80" fill="#facc15" font-size="11" font-weight="bold" text-anchor="middle">ÁREA COM BAIXO ILUMINAMENTO</text></svg>`
+      },
+      {
+        id: 'A8', category: 'Ergonomia', difficulty: 2, title: 'Ruído Elevado em Setor Sem Medição Recente',
+        correct: 'amarelo', nrRelated: 'NR-15',
+        explanation: 'Compressor novo instalado sem dosimetria de ruído atualizada no PGR.',
+        safeAttitude: 'Realizar avaliação quantitativa de ruído e fornecer protetor auricular preventivamente.',
+        curiosidade: 'A exposição contínua acima de 85 dB(A) sem proteção provoca Perda Auditiva Induzida por Ruído (PAIR).',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><circle cx="80" cy="60" r="25" fill="#475569"/><path d="M 115 45 Q 125 60 115 75" fill="none" stroke="#facc15" stroke-width="3"/><path d="M 125 35 Q 140 60 125 85" fill="none" stroke="#facc15" stroke-width="3"/><text x="100" y="112" fill="#facc15" font-size="9" text-anchor="middle">RUÍDO PENDENTE DE DOSIMETRIA</text></svg>`
+      },
+
+      // 8 VERMELHAS
+      {
+        id: 'R1', category: 'Máquinas', difficulty: 1, title: 'Transmissão por Polia e Correia Aberta Sem Enclausuramento',
+        correct: 'vermelho', nrRelated: 'NR-12',
+        explanation: 'Engrenagens e correias em movimento giratório rápido sem grade de proteção fixa.',
+        safeAttitude: 'Interditar imediatamente o acionamento da máquina e instalar proteção resistente.',
+        curiosidade: 'Esmagamentos e amputações por partes móveis de máquinas continuam entre os acidentes mais graves do Brasil.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><circle cx="65" cy="60" r="22" fill="#ef4444" stroke="#fff" stroke-width="3"/><circle cx="135" cy="60" r="14" fill="#ef4444" stroke="#fff" stroke-width="3"/><line x1="65" y1="38" x2="135" y2="46" stroke="#000" stroke-width="5"/><line x1="65" y1="82" x2="135" y2="74" stroke="#000" stroke-width="5"/><text x="100" y="110" fill="#ef4444" font-size="11" font-weight="900" text-anchor="middle">PERIGO: RISCO DE AMPUTAÇÃO</text></svg>`
+      },
+      {
+        id: 'R2', category: 'Máquinas', difficulty: 2, title: 'Manutenção em Máquina Energizada Sem Bloqueio LOTO',
+        correct: 'vermelho', nrRelated: 'NR-10',
+        explanation: 'Mecânico com as mãos dentro da zona de prensagem sem cadeado nem etiqueta de advertência no disjuntor.',
+        safeAttitude: 'Parar o trabalho, desenergizar, bloquear com cadeado e testar a ausência de tensão.',
+        curiosidade: 'O religamento acidental por terceiros é a causa raiz da maioria das mortes em manutenção corretiva.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><rect x="50" y="30" width="100" height="50" fill="#334155"/><rect x="70" y="55" width="60" height="30" fill="#ef4444"/><path d="M 100 20 L 95 35 L 105 35 L 100 50" stroke="#facc15" stroke-width="3" fill="none"/><text x="100" y="110" fill="#ef4444" font-size="10" font-weight="900" text-anchor="middle">NÃO HÁ BLOQUEIO (LOTO)</text></svg>`
+      },
+      {
+        id: 'R3', category: 'Altura', difficulty: 1, title: 'Trabalho em Altura a 4m Sem Cinto e Ponto de Ancoragem',
+        correct: 'vermelho', nrRelated: 'NR-35',
+        explanation: 'Operador sobre andaime tubular sem guarda-corpo, sem cinto tipo paraquedista e sem linha de vida.',
+        safeAttitude: 'Embargar a atividade imediatamente até a instalação de linha de vida e ancoragem certificada.',
+        curiosidade: 'Toda atividade acima de 2,00m com risco de queda exige treinamento de NR-35 e Permissão de Trabalho (PT).',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><line x1="40" y1="120" x2="40" y2="40" stroke="#64748b" stroke-width="4"/><line x1="160" y1="120" x2="160" y2="40" stroke="#64748b" stroke-width="4"/><line x1="40" y1="40" x2="160" y2="40" stroke="#facc15" stroke-width="4"/><circle cx="100" cy="25" r="7" fill="#ef4444"/><line x1="100" y1="32" x2="100" y2="40" stroke="#ef4444" stroke-width="3"/><text x="100" y="80" fill="#ef4444" font-size="12" font-weight="900" text-anchor="middle">QUEDA COM RISCO FATAL</text></svg>`
+      },
+      {
+        id: 'R4', category: 'Altura', difficulty: 2, title: 'Escada de Abrir Usada em Superfície Instável com Operador no Último Degrau',
+        correct: 'vermelho', nrRelated: 'NR-35',
+        explanation: 'Escada de apoio montada sobre tambor amassado e operário apoiado no degrau proibido sem fixação.',
+        safeAttitude: 'Retirar o trabalhador, interditar a escada improvisada e providenciar plataforma elevatória.',
+        curiosidade: 'O último patamar de escadas de abrir jamais deve ser utilizado como degrau de trabalho.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><rect x="75" y="80" width="50" height="30" fill="#64748b"/><line x1="85" y1="80" x2="95" y2="25" stroke="#ef4444" stroke-width="4"/><line x1="115" y1="80" x2="105" y2="25" stroke="#ef4444" stroke-width="4"/><text x="100" y="112" fill="#ef4444" font-size="9" font-weight="bold" text-anchor="middle">BASE IMPROVISADA SOBRE TAMBOR</text></svg>`
+      },
+      {
+        id: 'R5', category: 'Elétrica', difficulty: 1, title: 'Painel Elétrico Geral 380V Aberto com Barramento Vivo Exposto',
+        correct: 'vermelho', nrRelated: 'NR-10',
+        explanation: 'Quadro de distribuição aberto em corredor de circulação com barramentos energizados acessíveis a qualquer contato acidental.',
+        safeAttitude: 'Interditar o acesso ao redor, fechar a porta e acionar eletricista habilitado com vestimenta antifracionamento.',
+        curiosidade: 'Um arco elétrico em 380V atinge temperaturas superiores a 10.000 °C em frações de segundo.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="60" y="20" width="80" height="80" fill="#1e293b" stroke="#ef4444" stroke-width="3"/><line x1="80" y1="35" x2="80" y2="85" stroke="#facc15" stroke-width="4"/><line x1="100" y1="35" x2="100" y2="85" stroke="#facc15" stroke-width="4"/><line x1="120" y1="35" x2="120" y2="85" stroke="#facc15" stroke-width="4"/><text x="100" y="112" fill="#ef4444" font-size="10" font-weight="bold" text-anchor="middle">BARRAMENTO VIVO 380V EXPOSTO</text></svg>`
+      },
+      {
+        id: 'R6', category: 'Incêndio', difficulty: 1, title: 'Extintor e Rota de Fuga Totalmente Bloqueados por Paletes',
+        correct: 'vermelho', nrRelated: 'NR-23',
+        explanation: 'Paletes pesados empilhados diretamente na frente do extintor e trancando a porta corta-fogo.',
+        safeAttitude: 'Remover a carga imediatamente com empilhadeira e aplicar Advertência Formal ao encarregado.',
+        curiosidade: 'Durante um princípio de incêndio, o tempo médio para o fogo sair de controle é de apenas 2 a 3 minutos.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><rect x="92" y="20" width="16" height="40" rx="4" fill="#991b1b"/><rect x="50" y="45" width="100" height="25" fill="#ca8a04" stroke="#000" stroke-width="2"/><rect x="50" y="70" width="100" height="25" fill="#a16207" stroke="#000" stroke-width="2"/><text x="100" y="112" fill="#ef4444" font-size="10" font-weight="900" text-anchor="middle">SAÍDA & EXTINTOR TRANCADOS</text></svg>`
+      },
+      {
+        id: 'R7', category: 'Máquinas', difficulty: 2, title: 'Pessoa Sendo Transportada no Garfo da Empilhadeira',
+        correct: 'vermelho', nrRelated: 'NR-11',
+        explanation: 'Trabalhador erguido a 3 metros de altura em pé sobre os garfos da empilhadeira para consertar calha.',
+        safeAttitude: 'Mandar descer imediatamente, proibir a prática e exigir plataforma articulada ou gaiola homologada.',
+        curiosidade: 'Quedas de garfo de empilhadeira frequentemente resultam em traumatismo craniano ou óbito.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#0f172a"/><rect x="30" y="60" width="60" height="40" fill="#facc15"/><line x1="90" y1="20" x2="90" y2="100" stroke="#000" stroke-width="4"/><line x1="90" y1="30" x2="135" y2="30" stroke="#475569" stroke-width="5"/><circle cx="115" cy="15" r="6" fill="#ef4444"/><line x1="115" y1="21" x2="115" y2="30" stroke="#ef4444" stroke-width="3"/><text x="100" y="112" fill="#ef4444" font-size="10" font-weight="900" text-anchor="middle">CARONA FATAL NO GARFO</text></svg>`
+      },
+      {
+        id: 'R8', category: 'EPI', difficulty: 1, title: 'Operário Esmerilhando Tubo de Aço Sem Óculos e Sem Protetor Facial',
+        correct: 'vermelho', nrRelated: 'NR-6',
+        explanation: 'Fagulhas incandescentes sendo projetadas diretamente contra os olhos e face desprotegida do operador.',
+        safeAttitude: 'Parar a operação na hora, disponibilizar óculos ampla visão e protetor facial de policarbonato.',
+        curiosidade: 'Fragmentos de disco de corte podem romper e atingir o trabalhador a velocidades de mais de 300 km/h.',
+        svgScene: `<svg viewBox="0 0 200 120" width="100%" height="100%"><rect width="200" height="120" fill="#1e293b"/><circle cx="80" cy="50" r="18" fill="#f87171"/><circle cx="130" cy="70" r="16" fill="#475569"/><path d="M 120 65 L 90 52" stroke="#facc15" stroke-width="2" stroke-dasharray="2 3"/><path d="M 120 70 L 85 58" stroke="#f97316" stroke-width="2" stroke-dasharray="2 3"/><text x="100" y="112" fill="#ef4444" font-size="10" font-weight="900" text-anchor="middle">SEM PROTETOR FACIAL</text></svg>`
+      }
+    ];
+
+    /* ==========================================================================
+       ESTADO GLOBAL DO JOGO
+       ========================================================================== */
+    const State = {
+      userName: 'Técnico Prevenção',
+      xp: 0,
+      safetyIndex: 100,
+      combo: 0,
+      lives: 3,
+      currentView: 'home',
+      powerUps: { hint: 2, skip: 1, shield: 1 },
+      stamps: { mod1: false, mod2: false, mod3: false, mod4: false, mod5: false, mod6: false, mod7: false, mod8: false },
+      achievements: [
+        { id: 'eagle', title: 'Olho de Águia', desc: 'Identificou 5 riscos sem hesitar', unlocked: false },
+        { id: 'flawless', title: 'Sem Erros', desc: 'Concluiu uma modalidade com 100% de acerto', unlocked: false },
+        { id: 'speed', title: 'Velocista', desc: 'Respondeu 3 situações em menos de 10s', unlocked: false },
+        { id: 'master_epi', title: 'Mestre dos EPIs', desc: 'Montou o kit do vestiário com perfeição', unlocked: false },
+        { id: 'detective', title: 'Investigador', desc: 'Montou a árvore de causas sem falhas', unlocked: false },
+        { id: 'cool_blood', title: 'Sangue Frio', desc: 'Resolveu a Sala de Crise com zero baixas', unlocked: false },
+        { id: 'team_leader', title: 'Líder de Equipe', desc: 'Comandou uma rodada na Arena', unlocked: false },
+        { id: 'master_auditor', title: 'Auditor Master', desc: 'Aprovado com 80+ na Auditoria Final', unlocked: false }
+      ],
+      mistakesHistory: [],
+      shiftStartTime: Date.now(),
+      pendingFeedbackAction: null,
+      activeShield: false
+    };
+
+    /* ==========================================================================
+       PARTÍCULAS E CONFETES
+       ========================================================================== */
+    const ParticleFX = {
+      canvas: document.getElementById('fx-canvas'),
+      ctx: null,
+      particles: [],
+      animId: null,
+
+      init() {
+        if (!this.canvas) return;
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+      },
+
+      resize() {
+        if (!this.canvas) return;
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      },
+
+      triggerConfetti(x = window.innerWidth / 2, y = window.innerHeight / 3) {
+        this.init();
+        const colors = ['#22c55e', '#facc15', '#ef4444', '#38bdf8', '#c084fc', '#f43f5e'];
+        for (let i = 0; i < 75; i++) {
+          this.particles.push({
+            x: x, y: y,
+            vx: (Math.random() - 0.5) * 16,
+            vy: (Math.random() - 0.7) * 18,
+            size: Math.random() * 8 + 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            life: 100, rotation: Math.random() * 360,
+            rotSpeed: (Math.random() - 0.5) * 12
+          });
+        }
+        if (!this.animId) this.loop();
+      },
+
+      loop() {
+        if (!this.ctx) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.45;
+          p.rotation += p.rotSpeed;
+          p.life -= 1.8;
+
+          this.ctx.save();
+          this.ctx.translate(p.x, p.y);
+          this.ctx.rotate((p.rotation * Math.PI) / 180);
+          this.ctx.fillStyle = p.color;
+          this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          this.ctx.restore();
+
+          if (p.life <= 0) this.particles.splice(i, 1);
+        }
+
+        if (this.particles.length > 0) {
+          this.animId = requestAnimationFrame(() => this.loop());
+        } else {
+          cancelAnimationFrame(this.animId);
+          this.animId = null;
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+      }
+    };
+
+    /* ==========================================================================
+       CONTROLADOR GERAL
+       ========================================================================== */
+    const GameApp = {
+      init() {
+        ParticleFX.init();
+        this.renderFactoryMap();
+        this.updateHUD();
+        this.setupKeyboard();
+        this.initTrafficLightAnimation();
+      },
+
+      initTrafficLightAnimation() {
+        let step = 0;
+        setInterval(() => {
+          const red = document.getElementById('lamp-red');
+          const yellow = document.getElementById('lamp-yellow');
+          const green = document.getElementById('lamp-green');
+          if (!red || !yellow || !green) return;
+          red.classList.remove('lit');
+          yellow.classList.remove('lit');
+          green.classList.remove('lit');
+
+          if (step === 0) red.classList.add('lit');
+          else if (step === 1) yellow.classList.add('lit');
+          else green.classList.add('lit');
+
+          step = (step + 1) % 3;
+        }, 1200);
+      },
+
+      startShift() {
+        AudioFX.playClick();
+        const input = document.getElementById('input-tech-name');
+        if (input && input.value.trim()) State.userName = input.value.trim();
+        State.shiftStartTime = Date.now();
+        this.updateHUD();
+        this.navigate('map');
+      },
+
+      startGroupMode() {
+        AudioFX.playClick();
+        this.navigate('mod7');
+        Modality7.openSetup();
+      },
+
+      navigate(viewId) {
+        AudioFX.playClick();
+        State.currentView = viewId;
+        document.querySelectorAll('.view-screen').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(`view-${viewId}`);
+        if (target) {
+          target.classList.add('active');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        if (viewId === 'map') this.renderFactoryMap();
+        else if (viewId === 'mod1') Modality1.init();
+        else if (viewId === 'mod2') Modality2.init();
+        else if (viewId === 'mod3') Modality3.init();
+        else if (viewId === 'mod4') Modality4.init();
+        else if (viewId === 'mod5') Modality5.init();
+        else if (viewId === 'mod6') Modality6.init();
+        else if (viewId === 'mod7') Modality7.init();
+        else if (viewId === 'mod8') Modality8.init();
+      },
+
+      updateHUD() {
+        const nameEl = document.getElementById('hud-user-name');
+        const xpEl = document.getElementById('hud-user-xp');
+        const levelEl = document.getElementById('hud-user-level');
+        const safetyPctEl = document.getElementById('hud-safety-pct');
+        const safetyFillEl = document.getElementById('hud-safety-fill');
+        const comboTag = document.getElementById('hud-combo-tag');
+        const comboVal = document.getElementById('hud-combo-val');
+
+        if (nameEl) nameEl.innerText = State.userName;
+        if (xpEl) xpEl.innerText = `${State.xp} XP`;
+        if (safetyPctEl) safetyPctEl.innerText = `${Math.round(State.safetyIndex)}%`;
+        if (safetyFillEl) safetyFillEl.style.width = `${Math.max(0, Math.min(100, State.safetyIndex))}%`;
+
+        let title = 'Estagiário';
+        if (State.xp > 200 && State.xp <= 500) title = 'Auxiliar';
+        else if (State.xp > 500 && State.xp <= 1000) title = 'Técnico';
+        else if (State.xp > 1000 && State.xp <= 1800) title = 'Técnico Sênior';
+        else if (State.xp > 1800) title = 'Mestre da Segurança';
+        if (levelEl) levelEl.innerText = title;
+
+        if (comboTag && comboVal) {
+          if (State.combo > 1) {
+            comboTag.style.display = 'flex';
+            comboVal.innerText = State.combo;
+          } else {
+            comboTag.style.display = 'none';
+          }
+        }
+
+        for (let i = 1; i <= 3; i++) {
+          const l = document.getElementById(`life-${i}`);
+          if (l) l.style.opacity = (i <= State.lives) ? '1' : '0.2';
+        }
+      },
+
+      addXP(amount) {
+        State.xp += amount;
+        State.safetyIndex = Math.min(100, State.safetyIndex + 4);
+        State.combo += 1;
+        this.updateHUD();
+      },
+
+      penalizeMistake(sit) {
+        if (State.activeShield) {
+          State.activeShield = false;
+          alert('🛡️ Escudo utilizado! A penalidade foi neutralizada.');
+          return;
+        }
+        State.combo = 0;
+        State.safetyIndex = Math.max(0, State.safetyIndex - 12);
+        State.lives = Math.max(0, State.lives - 1);
+        if (sit) State.mistakesHistory.push(sit);
+        this.updateHUD();
+        document.body.classList.add('shake-animation');
+        setTimeout(() => document.body.classList.remove('shake-animation'), 400);
+      },
+
+      usePowerUp(type) {
+        AudioFX.playClick();
+        if (State.powerUps[type] <= 0) {
+          alert('Você não tem mais cargas deste power-up!');
+          return;
+        }
+        State.powerUps[type]--;
+
+        if (type === 'hint') {
+          alert('💡 DICA DO ESPECIALISTA: Observe com atenção os pontos de atrito mecânico, conformidade de aterramento e proteção individual obrigatória da norma citada.');
+        } else if (type === 'skip') {
+          alert('⏭️ Situação pulada sem penalidade!');
+          if (State.pendingFeedbackAction) State.pendingFeedbackAction();
+        } else if (type === 'shield') {
+          State.activeShield = true;
+          alert('🛡️ Escudo ativado! O próximo erro não causará perda de pontos nem vidas.');
+        }
+        this.updateHUD();
+      },
+
+      stampCompleted(modKey) {
+        State.stamps[modKey] = true;
+        this.renderFactoryMap();
+        ParticleFX.triggerConfetti();
+        AudioFX.playSuccess();
+      },
+
+      getCompletedStampsCount() {
+        return Object.values(State.stamps).filter(Boolean).length;
+      },
+
+      renderFactoryMap() {
+        const grid = document.getElementById('factory-sectors-grid');
+        if (!grid) return;
+        const count = this.getCompletedStampsCount();
+
+        const sectors = [
+          { key: 'mod1', title: '1. Almoxarifado', desc: 'Semáforo Relâmpago: esteira rolante de classificação ágil.', icon: '⚡' },
+          { key: 'mod2', title: '2. Linha de Produção', desc: 'Detetive do Acidente: árvore de causas e medidas corretivas.', icon: '🕵️' },
+          { key: 'mod3', title: '3. Galpão Escuro', desc: 'Caça aos Riscos com Lanterna e bateria decrescente.', icon: '🔦' },
+          { key: 'mod4', title: '4. Vestiário', desc: 'Armário de EPIs: 24 itens técnicos e múltiplas Ordens de Serviço.', icon: '🦺' },
+          { key: 'mod5', title: '5. Oficina Mecânica', desc: 'Âncora do Procedimento: sequenciamento cronológico LOTO.', icon: '⚓' },
+          { key: 'mod6', title: '6. Pátio e Docas', desc: 'Sala de Crise: resposta a emergências e vidas em perigo.', icon: '🚨' },
+          { key: 'mod7', title: '7. Sala de Reunião', desc: 'Arena de Equipes: dinâmica interativa para sala de aula.', icon: '👥' },
+          { key: 'mod8', title: '8. Diretoria', desc: 'Auditoria Final: inspeção mestre (libera com 4 carimbos).', icon: '👔', locked: count < 4 }
+        ];
+
+        grid.innerHTML = sectors.map(s => `
+          <div class="sector-card ${State.stamps[s.key] ? 'completed' : ''} ${s.locked ? 'locked' : ''}" 
+               onclick="${s.locked ? `alert('🔒 Setor bloqueado! Conclua ao menos 4 modalidades para abrir a Auditoria Final.')` : `GameApp.navigate('${s.key}')`}"
+               tabindex="0" role="button">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="sector-icon-svg" style="font-size:1.8rem; display:flex; align-items:center; justify-content:center;">${s.icon}</div>
+              <div>
+                <h3>${s.title}</h3>
+                <p>${s.desc}</p>
+              </div>
+            </div>
+            <div class="sector-meta">
+              <span>${State.stamps[s.key] ? 'Status: CONCLUÍDO' : (s.locked ? 'Requer 4 carimbos' : 'Status: PENDENTE')}</span>
+              <span>${State.stamps[s.key] ? '⭐ 100 XP' : '+150 XP'}</span>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      showFeedback(sit, isCorrect, nextCallback) {
+        State.pendingFeedbackAction = nextCallback;
+        const modal = document.getElementById('modal-feedback');
+        const header = document.getElementById('modal-fb-header');
+        const resultTitle = document.getElementById('modal-fb-result-title');
+        const badge = document.getElementById('modal-fb-badge');
+        const nr = document.getElementById('modal-fb-nr');
+        const why = document.getElementById('modal-fb-why');
+        const attitude = document.getElementById('modal-fb-attitude');
+        const trivia = document.getElementById('modal-fb-trivia');
+
+        if (isCorrect) {
+          AudioFX.playSuccess();
+          ParticleFX.triggerConfetti();
+          header.className = 'modal-header-strip success';
+          resultTitle.innerHTML = '✅ PARABÉNS! IDENTIFICAÇÃO CORRETA';
+        } else {
+          AudioFX.playError();
+          header.className = 'modal-header-strip danger';
+          resultTitle.innerHTML = '❌ ATENÇÃO! RISCO NÃO IDENTIFICADO';
+        }
+
+        const colorMap = {
+          verde: { label: '🟢 SEGURO (CONFORME)', bg: '#15803d', text: '#fff' },
+          amarelo: { label: '🟡 ATENÇÃO (DESVIO)', bg: '#a16207', text: '#fff' },
+          vermelho: { label: '🔴 PERIGO GRAVE (CRÍTICO)', bg: '#b91c1c', text: '#fff' }
+        };
+
+        const c = colorMap[sit.correct] || colorMap.verde;
+        badge.innerText = c.label;
+        badge.style.background = c.bg;
+        badge.style.color = c.text;
+
+        nr.innerText = sit.nrRelated || 'NR Geral';
+        why.innerText = sit.explanation;
+        attitude.innerText = sit.safeAttitude;
+        trivia.innerText = sit.curiosidade || 'A cultura de segurança é construída com prevenção diária.';
+
+        modal.classList.add('active');
+      },
+
+      closeFeedback() {
+        AudioFX.playClick();
+        const modal = document.getElementById('modal-feedback');
+        modal.classList.remove('active');
+        if (State.pendingFeedbackAction) {
+          const cb = State.pendingFeedbackAction;
+          State.pendingFeedbackAction = null;
+          cb();
+        }
+      },
+
+      openBadgeModal() {
+        AudioFX.playClick();
+        document.getElementById('badge-modal-name').innerText = State.userName;
+        document.getElementById('badge-modal-xp').innerText = `${State.xp} XP Acumulados`;
+
+        const stampsGrid = document.getElementById('badge-stamps-grid');
+        const stampNames = ['Almoxarifado', 'Produção', 'Galpão', 'Vestiário', 'Oficina', 'Crise', 'Arena', 'Auditoria'];
+        stampsGrid.innerHTML = stampNames.map((name, i) => {
+          const key = `mod${i + 1}`;
+          const ok = State.stamps[key];
+          return `
+            <div style="background:#111827; border:1px solid ${ok ? 'var(--color-green)' : '#334155'}; border-radius:6px; padding:6px; font-size:0.75rem; text-align:center;">
+              <div style="font-size:1.2rem;">${ok ? '✅' : '🔒'}</div>
+              <div style="color:${ok ? 'var(--color-green)' : 'var(--text-muted)'}; font-weight:700;">${name}</div>
+            </div>
+          `;
+        }).join('');
+
+        const achList = document.getElementById('badge-achievements-list');
+        achList.innerHTML = State.achievements.map(a => `
+          <div style="background:#1e293b; padding:8px 12px; border-radius:6px; border-left:4px solid ${a.unlocked ? 'var(--color-yellow)' : '#475569'}; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:#fff; font-size:0.85rem;">${a.title}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${a.desc}</div>
+            </div>
+            <span>${a.unlocked ? '🏆 DESBLOQUEADO' : '🔒'}</span>
+          </div>
+        `).join('');
+
+        document.getElementById('modal-badge').classList.add('active');
+      },
+
+      openRankingModal() {
+        AudioFX.playClick();
+        const tbody = document.getElementById('ranking-table-body');
+        let records = [];
+        try {
+          records = JSON.parse(localStorage.getItem('semaforo_seguranca_rank') || '[]');
+        } catch (e) {
+          records = [];
+        }
+
+        if (records.length === 0) {
+          records = [
+            { name: State.userName, mode: 'Turno Geral', score: State.xp || 350 },
+            { name: 'Engª Camila Ribeiro', mode: 'Auditoria Master', score: 920 },
+            { name: 'Téc. Marcos Souza', mode: 'Semáforo Relâmpago', score: 680 },
+            { name: 'Equipe Alfa CIPA', mode: 'Arena de Equipes', score: 540 }
+          ];
+        }
+
+        tbody.innerHTML = records.map((r, idx) => `
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px; font-weight:800; color:var(--color-yellow);">${idx + 1}º</td>
+            <td><strong>${r.name}</strong></td>
+            <td style="color:var(--text-muted);">${r.mode}</td>
+            <td style="color:var(--color-green); font-weight:800;">${r.score} pts</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('modal-ranking').classList.add('active');
+      },
+
+      openTeacherMode() {
+        AudioFX.playClick();
+        this.renderTeacherTable();
+        document.getElementById('modal-teacher').classList.add('active');
+      },
+
+      renderTeacherTable() {
+        const cat = document.getElementById('teacher-filter-cat').value;
+        const tbody = document.getElementById('teacher-table-body');
+        const filtered = (cat === 'ALL') ? SITUATIONS_DB : SITUATIONS_DB.filter(s => s.category === cat);
+
+        tbody.innerHTML = filtered.map(s => {
+          const colorBadge = s.correct === 'verde' ? '<span style="color:var(--color-green); font-weight:bold;">🟢 VERDE</span>' :
+                            s.correct === 'amarelo' ? '<span style="color:var(--color-yellow); font-weight:bold;">🟡 AMARELO</span>' :
+                            '<span style="color:var(--color-red); font-weight:bold;">🔴 VERMELHO</span>';
+          return `
+            <tr style="border-bottom:1px solid #1f2937;">
+              <td style="padding:6px 8px; font-weight:bold;">${s.id}</td>
+              <td>${s.title}</td>
+              <td style="color:var(--color-blue);">${s.category}</td>
+              <td>${colorBadge}</td>
+              <td><strong>${s.nrRelated}</strong></td>
+            </tr>
+          `;
+        }).join('');
+      },
+
+      openHelpModal() {
+        AudioFX.playClick();
+        document.getElementById('modal-help').classList.add('active');
+      },
+
+      closeModals() {
+        AudioFX.playClick();
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+      },
+
+      setupKeyboard() {
+        window.addEventListener('keydown', (e) => {
+          const feedbackModal = document.getElementById('modal-feedback');
+          if (feedbackModal && feedbackModal.classList.contains('active')) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              GameApp.closeFeedback();
+            }
+            return;
+          }
+
+          if (State.currentView === 'mod1') {
+            if (e.key === '1') Modality1.answer('verde');
+            else if (e.key === '2') Modality1.answer('amarelo');
+            else if (e.key === '3') Modality1.answer('vermelho');
+          }
+        });
+      },
+
+      endShiftSummary() {
+        this.navigate('final');
+        const elapsedSec = Math.round((Date.now() - State.shiftStartTime) / 1000);
+        const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+        const secs = String(elapsedSec % 60).padStart(2, '0');
+
+        document.getElementById('final-score').innerText = `${State.xp} pts`;
+        document.getElementById('final-accuracy').innerText = `${Math.round(State.safetyIndex)}%`;
+        document.getElementById('final-time').innerText = `${mins}:${secs}`;
+
+        const medalSvg = document.getElementById('final-medal-svg');
+        const sub = document.getElementById('final-subtitle');
+        if (State.safetyIndex >= 90) {
+          medalSvg.innerHTML = `<circle cx="50" cy="50" r="42" fill="#eab308" stroke="#ca8a04" stroke-width="6"/><polygon points="50,20 58,36 76,38 63,50 67,68 50,59 33,68 37,50 24,38 42,36" fill="#fff"/>`;
+          sub.innerText = 'Medalha de OURO – Excelência Preventiva Técnica!';
+        } else if (State.safetyIndex >= 60) {
+          medalSvg.innerHTML = `<circle cx="50" cy="50" r="42" fill="#94a3b8" stroke="#64748b" stroke-width="6"/><polygon points="50,20 58,36 76,38 63,50 67,68 50,59 33,68 37,50 24,38 42,36" fill="#fff"/>`;
+          sub.innerText = 'Medalha de PRATA – Bom Desempenho Operacional!';
+        } else {
+          medalSvg.innerHTML = `<circle cx="50" cy="50" r="42" fill="#b45309" stroke="#78350f" stroke-width="6"/><circle cx="50" cy="50" r="28" fill="#d97706"/>`;
+          sub.innerText = 'Medalha de BRONZE – Requer Reciclagem Técnica em Normas.';
+        }
+
+        const list = document.getElementById('final-mistakes-list');
+        if (State.mistakesHistory.length > 0) {
+          list.innerHTML = State.mistakesHistory.map(m => `
+            <li style="margin-bottom:8px;">
+              <strong style="color:#fff;">${m.title}:</strong> Norma: ${m.nrRelated}. Conduta correta: ${m.safeAttitude}
+            </li>
+          `).join('');
+        }
+
+        try {
+          const recs = JSON.parse(localStorage.getItem('semaforo_seguranca_rank') || '[]');
+          recs.push({ name: State.userName, mode: 'Turno Completo', score: State.xp, date: new Date().toLocaleDateString() });
+          recs.sort((a, b) => b.score - a.score);
+          localStorage.setItem('semaforo_seguranca_rank', JSON.stringify(recs.slice(0, 10)));
+        } catch (e) {}
+      },
+
+      restartShift() {
+        State.xp = 0;
+        State.safetyIndex = 100;
+        State.combo = 0;
+        State.lives = 3;
+        State.mistakesHistory = [];
+        Object.keys(State.stamps).forEach(k => State.stamps[k] = false);
+        this.updateHUD();
+        this.navigate('map');
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 1: SEMÁFORO RELÂMPAGO
+       ========================================================================== */
+    const Modality1 = {
+      queue: [],
+      currentIndex: 0,
+      score: 0,
+      speed: 1,
+
+      init() {
+        this.score = 0;
+        this.speed = 1;
+        this.queue = [...SITUATIONS_DB].sort(() => Math.random() - 0.5);
+        this.currentIndex = 0;
+        this.renderCurrent();
+      },
+
+      renderCurrent() {
+        if (this.currentIndex >= this.queue.length || State.lives <= 0) {
+          GameApp.stampCompleted('mod1');
+          alert('🏁 Rodada de Semáforo Relâmpago finalizada! Carimbo do Almoxarifado conquistado!');
+          GameApp.navigate('map');
+          return;
+        }
+
+        const sit = this.queue[this.currentIndex];
+        const box = document.getElementById('m1-scene-box');
+        document.getElementById('m1-score').innerText = this.score;
+        document.getElementById('m1-speed').innerText = `${this.speed.toFixed(1)}x`;
+
+        box.innerHTML = `
+          <div style="font-size:0.75rem; color:var(--color-blue); font-weight:800; text-transform:uppercase;">CENÁRIO #${this.currentIndex + 1} • ${sit.category}</div>
+          <div style="height:120px; width:100%; display:flex; align-items:center; justify-content:center;">${sit.svgScene}</div>
+          <div style="font-weight:700; font-size:1rem; margin-top:4px; text-align:center;">${sit.title}</div>
+        `;
+      },
+
+      answer(colorChosen) {
+        const sit = this.queue[this.currentIndex];
+        const isRight = (sit.correct === colorChosen);
+
+        if (isRight) {
+          this.score += 10 * State.combo;
+          GameApp.addXP(15);
+          this.speed += 0.1;
+        } else {
+          GameApp.penalizeMistake(sit);
+        }
+
+        GameApp.showFeedback(sit, isRight, () => {
+          this.currentIndex++;
+          this.renderCurrent();
+        });
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 2: DETETIVE DE ACIDENTE
+       ========================================================================== */
+    const Modality2 = {
+      cluesFound: 0,
+
+      init() {
+        this.cluesFound = 0;
+        document.getElementById('m2-clues-count').innerText = '0';
+        document.getElementById('m2-clues-list').innerHTML = 'Clique nos pontos destacados da cena...';
+        this.renderScene();
+      },
+
+      renderScene() {
+        const container = document.getElementById('m2-scene-container');
+        container.innerHTML = `
+          <svg viewBox="0 0 400 300" width="100%" height="100%">
+            <rect width="400" height="300" fill="#0f172a"/>
+            <rect x="50" y="80" width="160" height="130" fill="#334155" rx="6"/>
+            <rect x="70" y="110" width="120" height="40" fill="#1e293b"/>
+            <ellipse cx="250" cy="220" rx="35" ry="12" fill="#ef4444"/>
+            <circle cx="285" cy="210" r="12" fill="#f87171"/>
+            <ellipse cx="230" cy="215" rx="45" ry="16" fill="rgba(245, 158, 11, 0.45)" stroke="#f59e0b" stroke-width="2"/>
+          </svg>
+          <div class="clue-hotspot" style="top:60%; left:52%;" onclick="Modality2.inspectClue(1, 'Mancha extensa de óleo lubrificante escorrendo da flange da máquina.')" title="Pista: Poça de Óleo">🔍</div>
+          <div class="clue-hotspot" style="top:68%; left:68%;" onclick="Modality2.inspectClue(2, 'Operador utilizando calçado com sola gasta sem absorção de impacto.')" title="Pista: Calçado">🔍</div>
+          <div class="clue-hotspot" style="top:32%; left:25%;" onclick="Modality2.inspectClue(3, 'Falta de bacia de contenção preventiva sob a linha hidráulica.')" title="Pista: Sem Contenção">🔍</div>
+          <div class="clue-hotspot" style="top:75%; left:30%;" onclick="Modality2.inspectClue(4, 'Ausência de placa de piso escorregadio no corredor.')" title="Pista: Sem Placa">🔍</div>
+        `;
+      },
+
+      inspectClue(id, text) {
+        AudioFX.playClick();
+        const list = document.getElementById('m2-clues-list');
+        if (list.innerHTML.includes('Clique nos pontos')) list.innerHTML = '';
+        list.innerHTML += `<div style="color:var(--color-yellow); margin-bottom:4px;">✓ ${text}</div>`;
+        this.cluesFound++;
+        document.getElementById('m2-clues-count').innerText = this.cluesFound;
+      },
+
+      submitReport() {
+        const c1 = document.getElementById('m2-immediate-cause').value;
+        const c2 = document.getElementById('m2-root-cause').value;
+        const c3 = document.getElementById('m2-preventive-action').value;
+
+        if (!c1 || !c2 || !c3) {
+          alert('Preencha todas as 3 etapas da Árvore de Causas antes de emitir o relatório!');
+          return;
+        }
+
+        const isSuccess = (c1 === 'piso_oleo' && c2 === 'manutencao_falha' && c3 === 'epc_manut');
+        if (isSuccess) {
+          GameApp.addXP(100);
+          GameApp.stampCompleted('mod2');
+          alert('🏆 INVESTIGAÇÃO CONCLUÍDA COM SUCESSO!\nRelatório aprovado: Causa Imediata, Causa Raiz e Medida EPC corretas segundo a metodologia de Árvore de Causas.');
+          GameApp.navigate('map');
+        } else {
+          GameApp.penalizeMistake();
+          alert('❌ Incoerência na Árvore de Causas. Revise se a causa imediata trata do fator físico direto e se a causa raiz aborda a gestão da manutenção preventiva.');
+        }
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 3: CAÇA COM LANTERNA
+       ========================================================================== */
+    const Modality3 = {
+      hazardsFound: 0,
+      battery: 100,
+      timer: null,
+
+      init() {
+        this.hazardsFound = 0;
+        this.battery = 100;
+        document.getElementById('m3-hazards-found').innerText = '0';
+        document.getElementById('m3-battery-fill').style.width = '100%';
+        this.setupFlashlight();
+        this.renderHazards();
+        this.startBatteryTimer();
+      },
+
+      setupFlashlight() {
+        const vp = document.getElementById('m3-viewport');
+        const dark = document.getElementById('m3-darkness');
+        vp.onmousemove = (e) => {
+          const rect = vp.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          dark.style.setProperty('--light-x', `${x}px`);
+          dark.style.setProperty('--light-y', `${y}px`);
+        };
+        vp.ontouchmove = (e) => {
+          const rect = vp.getBoundingClientRect();
+          const touch = e.touches[0];
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          dark.style.setProperty('--light-x', `${x}px`);
+          dark.style.setProperty('--light-y', `${y}px`);
+        };
+      },
+
+      renderHazards() {
+        const content = document.getElementById('m3-scene-content');
+        content.innerHTML = `
+          <svg viewBox="0 0 900 480" width="100%" height="100%">
+            <rect width="900" height="480" fill="#0b0f19"/>
+            <line x1="0" y1="380" x2="900" y2="380" stroke="#334155" stroke-width="3"/>
+          </svg>
+          <div class="hidden-hazard-target" style="top:150px; left:120px;" onclick="Modality3.clickTarget(true, 'Painel Elétrico com fiação viva exposta (NR-10)')">⚡</div>
+          <div class="hidden-hazard-target" style="top:320px; left:300px;" onclick="Modality3.clickTarget(true, 'Tambor de ácido sem rótulo de segurança (NR-26)')">🧪</div>
+          <div class="hidden-hazard-target" style="top:100px; left:520px;" onclick="Modality3.clickTarget(true, 'Cabo de aço de guindaste desfiado (NR-11)')">🪢</div>
+          <div class="hidden-hazard-target" style="top:310px; left:750px;" onclick="Modality3.clickTarget(true, 'Extintor obstruído por caixas de papelão (NR-23)')">🧯</div>
+          <div class="hidden-hazard-target" style="top:180px; left:380px;" onclick="Modality3.clickTarget(true, 'Escada com degrau trincado apoiada em fiação (NR-35)')">🪜</div>
+
+          <div class="hidden-hazard-target" style="top:260px; left:210px;" onclick="Modality3.clickTarget(false, 'Extintor perfeitamente demarcado e dentro da validade.')">🧯</div>
+          <div class="hidden-hazard-target" style="top:330px; left:580px;" onclick="Modality3.clickTarget(false, 'Caixa de primeiros socorros lacrada e abastecida.')">🩹</div>
+          <div class="hidden-hazard-target" style="top:80px; left:720px;" onclick="Modality3.clickTarget(false, 'Luminária de emergência fotoluminescente ativa.')">💡</div>
+        `;
+      },
+
+      startBatteryTimer() {
+        if (this.timer) clearInterval(this.timer);
+        this.timer = setInterval(() => {
+          this.battery -= 1.5;
+          const bar = document.getElementById('m3-battery-fill');
+          if (bar) bar.style.width = `${Math.max(0, this.battery)}%`;
+
+          if (this.battery <= 0) {
+            clearInterval(this.timer);
+            alert('🔋 A bateria da lanterna acabou! Retorne ao mapa para reiniciar a varredura.');
+            GameApp.navigate('map');
+          }
+        }, 1000);
+      },
+
+      clickTarget(isDanger, label) {
+        if (isDanger) {
+          AudioFX.playSuccess();
+          this.hazardsFound++;
+          document.getElementById('m3-hazards-found').innerText = this.hazardsFound;
+          alert(`✅ PERIGO LOCALIZADO:\n${label}`);
+          if (this.hazardsFound >= 5) {
+            clearInterval(this.timer);
+            GameApp.addXP(80);
+            GameApp.stampCompleted('mod3');
+            alert('🏆 Galpão totalmente inspecionado! Todos os 5 perigos foram neutralizados.');
+            GameApp.navigate('map');
+          }
+        } else {
+          AudioFX.playError();
+          this.battery = Math.max(0, this.battery - 15);
+          GameApp.penalizeMistake();
+          alert(`⚠️ FALSO ALARME!\n"${label}" é uma condição SEGURA. Clicar em falsos alarmes consome bateria e reduz o índice de segurança!`);
+        }
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 4: ARMÁRIO DE EPIS (VESTIÁRIO SUPER EXPANDIDO COM 24 ITENS & 6 ORDENS)
+       ========================================================================== */
+    const Modality4 = {
+      currentFilter: 'ALL',
+      activeOSIndex: 0,
+      equipped: new Set(),
+
+      // CATÁLOGO DE ORDENS DE SERVIÇO
+      orders: [
+        {
+          id: 'OS-104',
+          title: 'OS #104 – Soldagem e Esmerilhamento em Estrutura Metálica',
+          desc: 'Risco de fagulhas incandescentes a 1000°C, radiação UV/IV de arco elétrico, projeção de limalhas e fumos metálicos de solda (NR-6 e NR-12).',
+          required: ['capacete_jugular', 'mascara_solda', 'protetor_facial', 'respirador_fumos', 'luva_raspa', 'avental_raspa', 'bota_biqueira_aco']
+        },
+        {
+          id: 'OS-208',
+          title: 'OS #208 – Manipulação de Ácido Sulfúrico Concentrado',
+          desc: 'Risco químico de respingos corrosivos severos, vapores ácidos agressivos e queimadura tecidual profunda (NR-6 e NR-26).',
+          required: ['oculos_ampla_visao', 'respirador_quimico', 'luva_nitrila_longa', 'avental_pvc', 'bota_pvc_quimica']
+        },
+        {
+          id: 'OS-312',
+          title: 'OS #312 – Intervenção em Painel de Subestação Elétrica 380V BT',
+          desc: 'Risco de choque elétrico letal por contato direto e arco voltaico de alta energia térmica (NR-6 e NR-10).',
+          required: ['capacete_eletricista', 'oculos_protecao', 'luva_isolante_bt', 'bota_dieletrica']
+        },
+        {
+          id: 'OS-416',
+          title: 'OS #416 – Manutenção em Telhado e Linha de Vida a 6m de Altura',
+          desc: 'Risco de queda com diferença de nível superior a 2 metros e traumatismo craniano grave (NR-6 e NR-35).',
+          required: ['capacete_jugular', 'oculos_protecao', 'luva_vaqueta', 'cinto_paraquedista', 'talabarte_duplo', 'bota_biqueira_aco']
+        },
+        {
+          id: 'OS-520',
+          title: 'OS #520 – Limpeza Interna em Espaço Confinado / Silo',
+          desc: 'Atmosfera com deficiência de oxigênio (IPVS), gases tóxicos e risco de engolfamento e asfixia (NR-6 e NR-33).',
+          required: ['capacete_jugular', 'mascara_autonoma', 'cinto_paraquedista', 'luva_nitrila_longa', 'bota_pvc_quimica']
+        },
+        {
+          id: 'OS-624',
+          title: 'OS #624 – Corte de Tubulações com Serra Policorte',
+          desc: 'Ruído de impacto acima de 98 dB(A), projeção mecânica violenta de fragmentos metálicos e fagulhas (NR-6, NR-12 e NR-15).',
+          required: ['capacete_jugular', 'protetor_facial', 'oculos_ampla_visao', 'protetor_concha', 'luva_raspa', 'bota_biqueira_aco']
+        }
+      ],
+
+      // CATÁLOGO DE 24 EPIS INDUSTRIAIS DETALHADOS
+      catalog: [
+        // Cabeça & Face
+        { id: 'capacete_jugular', name: 'Capacete c/ Jugular', category: 'cabeca', icon: '⛑️', layer: 'capacete' },
+        { id: 'capacete_eletricista', name: 'Capacete Classe B Aba Total', category: 'cabeca', icon: '👷‍♂️', layer: 'capacete' },
+        { id: 'mascara_solda', name: 'Máscara de Solda Automática', category: 'cabeca', icon: '🥽', layer: 'mascara' },
+        { id: 'protetor_facial', name: 'Protetor Facial Policarbonato', category: 'cabeca', icon: '🛡️', layer: 'mascara' },
+        { id: 'oculos_protecao', name: 'Óculos de Segurança Incolor', category: 'cabeca', icon: '👓', layer: 'oculos' },
+        { id: 'oculos_ampla_visao', name: 'Óculos Ampla Visão Vedado', category: 'cabeca', icon: '🥽', layer: 'oculos' },
+
+        // Ouvido & Respiração
+        { id: 'protetor_plug', name: 'Protetor Auditivo Plug Silicone', category: 'audio_resp', icon: '👂', layer: 'ouvido' },
+        { id: 'protetor_concha', name: 'Protetor Auditivo Concha (Abafador)', category: 'audio_resp', icon: '🎧', layer: 'ouvido' },
+        { id: 'respirador_fumos', name: 'Respirador PFF2 Fumos Metálicos', category: 'audio_resp', icon: '😷', layer: 'mascara' },
+        { id: 'respirador_quimico', name: 'Respirador c/ Cartucho Químico', category: 'audio_resp', icon: '🎭', layer: 'mascara' },
+        { id: 'mascara_autonoma', name: 'Conjunto Autônomo Ar Comprimido', category: 'audio_resp', icon: '🤿', layer: 'mascara' },
+
+        // Mãos & Braços
+        { id: 'luva_raspa', name: 'Luva de Raspa Cano Longo', category: 'maos', icon: '🧤', layer: 'luvas' },
+        { id: 'luva_vaqueta', name: 'Luva de Vaqueta Mista', category: 'maos', icon: '🧤', layer: 'luvas' },
+        { id: 'luva_nitrila_longa', name: 'Luva Nitrílica Anticorrosiva', category: 'maos', icon: '🧤', layer: 'luvas' },
+        { id: 'luva_neoprene', name: 'Luva Neoprene Alta Química', category: 'maos', icon: '🧤', layer: 'luvas' },
+        { id: 'luva_isolante_bt', name: 'Luva Isolante de Borracha BT', category: 'maos', icon: '🧤', layer: 'luvas' },
+        { id: 'luva_malha_aco', name: 'Luva de Malha de Aço Anticorte', category: 'maos', icon: '🧤', layer: 'luvas' },
+
+        // Corpo, Pés & Altura
+        { id: 'avental_raspa', name: 'Avental de Raspa para Soldador', category: 'corpo_pes', icon: '🦺', layer: 'avental' },
+        { id: 'avental_pvc', name: 'Avental em PVC Impermeável', category: 'corpo_pes', icon: '🥼', layer: 'avental' },
+        { id: 'bota_biqueira_aco', name: 'Botina c/ Biqueira de Aço', category: 'corpo_pes', icon: '🥾', layer: 'botas' },
+        { id: 'bota_dieletrica', name: 'Bota Dielétrica de Borracha', category: 'corpo_pes', icon: '🥾', layer: 'botas' },
+        { id: 'bota_pvc_quimica', name: 'Bota PVC Cano Alto Química', category: 'corpo_pes', icon: '🥾', layer: 'botas' },
+        { id: 'perneira_raspa', name: 'Perneira de Segurança em Raspa', category: 'corpo_pes', icon: '🦵', layer: 'botas' },
+        { id: 'cinto_paraquedista', name: 'Cinto Paraquedista Ponto Dorsal', category: 'corpo_pes', icon: '🪢', layer: 'cinto' },
+        { id: 'talabarte_duplo', name: 'Talabarte em Y c/ Absorvedor', category: 'corpo_pes', icon: '🔗', layer: 'cinto' }
+      ],
+
+      init() {
+        this.renderOSSelectors();
+        this.selectOS(this.activeOSIndex);
+      },
+
+      renderOSSelectors() {
+        const strip = document.getElementById('m4-os-selectors');
+        strip.innerHTML = this.orders.map((os, idx) => `
+          <button class="os-btn ${idx === this.activeOSIndex ? 'active' : ''}" onclick="Modality4.selectOS(${idx})">
+            ${os.id}
+          </button>
+        `).join('');
+      },
+
+      selectOS(idx) {
+        AudioFX.playClick();
+        this.activeOSIndex = idx;
+        this.equipped.clear();
+        this.renderOSSelectors();
+        const os = this.orders[idx];
+        document.getElementById('m4-order-title').innerText = `🦺 Vestiário: ${os.title}`;
+        document.getElementById('m4-order-desc').innerText = os.desc;
+        this.filterCategory(this.currentFilter);
+        this.renderEquipped();
+        this.updateMannequinLayers();
+      },
+
+      filterCategory(cat) {
+        AudioFX.playClick();
+        this.currentFilter = cat;
+        document.querySelectorAll('#m4-category-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+        const tabs = document.querySelectorAll('#m4-category-tabs .tab-btn');
+        if (cat === 'ALL' && tabs[0]) tabs[0].classList.add('active');
+        else if (cat === 'cabeca' && tabs[1]) tabs[1].classList.add('active');
+        else if (cat === 'audio_resp' && tabs[2]) tabs[2].classList.add('active');
+        else if (cat === 'maos' && tabs[3]) tabs[3].classList.add('active');
+        else if (cat === 'corpo_pes' && tabs[4]) tabs[4].classList.add('active');
+
+        const filtered = (cat === 'ALL') ? this.catalog : this.catalog.filter(e => e.category === cat);
+        const grid = document.getElementById('m4-shelf-grid');
+        grid.innerHTML = filtered.map(e => `
+          <div class="epi-card-item ${this.equipped.has(e.id) ? 'selected' : ''}" onclick="Modality4.toggleEPI('${e.id}')">
+            <div style="font-size:1.8rem;">${e.icon}</div>
+            <strong style="font-size:0.75rem;">${e.name}</strong>
+          </div>
+        `).join('');
+      },
+
+      toggleEPI(id) {
+        AudioFX.playClick();
+        if (this.equipped.has(id)) this.equipped.delete(id);
+        else this.equipped.add(id);
+
+        this.filterCategory(this.currentFilter);
+        this.renderEquipped();
+        this.updateMannequinLayers();
+      },
+
+      renderEquipped() {
+        const box = document.getElementById('m4-equipped-tags');
+        if (this.equipped.size === 0) {
+          box.innerHTML = '<span style="color:var(--text-muted); font-size:0.8rem;">Nenhum EPI equipado no momento.</span>';
+          return;
+        }
+        box.innerHTML = Array.from(this.equipped).map(id => {
+          const item = this.catalog.find(e => e.id === id);
+          return `<div class="equipped-tag" onclick="Modality4.toggleEPI('${id}')">${item.name} &times;</div>`;
+        }).join('');
+      },
+
+      updateMannequinLayers() {
+        const layers = ['capacete', 'mascara', 'oculos', 'ouvido', 'avental', 'cinto', 'luvas', 'botas'];
+        layers.forEach(layerId => {
+          const el = document.getElementById(`layer-${layerId}`);
+          if (!el) return;
+          const hasLayerItem = Array.from(this.equipped).some(id => {
+            const item = this.catalog.find(e => e.id === id);
+            return item && item.layer === layerId;
+          });
+          el.style.display = hasLayerItem ? 'block' : 'none';
+        });
+      },
+
+      validateKit() {
+        const os = this.orders[this.activeOSIndex];
+        const missing = os.required.filter(id => !this.equipped.has(id));
+        const extra = Array.from(this.equipped).filter(id => !os.required.includes(id));
+
+        if (missing.length === 0 && extra.length === 0) {
+          AudioFX.playSuccess();
+          ParticleFX.triggerConfetti();
+          GameApp.addXP(90);
+          GameApp.stampCompleted('mod4');
+          alert(`🏆 LIBERAÇÃO TÉCNICA APROVADA PARA ${os.id}!\nTodos os EPIs obrigatórios foram selecionados em conformidade rigorosa com a NR-6.`);
+          
+          if (this.activeOSIndex < this.orders.length - 1) {
+            if (confirm(`Deseja inspecionar a próxima Ordem de Serviço (${this.orders[this.activeOSIndex + 1].id})?`)) {
+              this.selectOS(this.activeOSIndex + 1);
+              return;
+            }
+          }
+          GameApp.navigate('map');
+        } else {
+          AudioFX.playError();
+          GameApp.penalizeMistake();
+          let msg = `❌ Não conformidade no kit para ${os.id}:\n`;
+          if (missing.length > 0) msg += `• Faltando: ${missing.map(id => this.catalog.find(e => e.id === id)?.name || id).join(', ')}\n`;
+          if (extra.length > 0) msg += `• Incompatíveis / Desnecessários: ${extra.map(id => this.catalog.find(e => e.id === id)?.name || id).join(', ')}`;
+          alert(msg);
+        }
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 5: ÂNCORA DO PROCEDIMENTO
+       ========================================================================== */
+    const Modality5 = {
+      correctOrder: [
+        '1. Notificar os operadores e supervisores do setor sobre a parada',
+        '2. Desligar a chave geral no painel de comando local',
+        '3. Bloquear o disjuntor com cadeado de segurança individual e garra LOTO',
+        '4. Fixar a etiqueta indelével de advertência com foto e identificação',
+        '5. Dissipar energias residuais (purgar ar comprimido e pressão hidráulica)',
+        '6. Testar o botão de ligar para comprovar o estado de energia zero'
+      ],
+      userOrder: [],
+
+      init() {
+        this.userOrder = [...this.correctOrder].sort(() => Math.random() - 0.5);
+        this.renderSteps();
+      },
+
+      renderSteps() {
+        const container = document.getElementById('m5-steps-container');
+        container.innerHTML = this.userOrder.map((step, idx) => `
+          <div class="procedure-step-card">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="background:var(--color-blue); color:#000; font-weight:900; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.85rem;">${idx + 1}</span>
+              <span style="font-weight:600; font-size:0.95rem;">${step}</span>
+            </div>
+            <div class="step-reorder-controls">
+              <button class="btn-step-move" onclick="Modality5.move(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+              <button class="btn-step-move" onclick="Modality5.move(${idx}, 1)" ${idx === this.userOrder.length - 1 ? 'disabled' : ''}>▼</button>
+            </div>
+          </div>
+        `).join('');
+      },
+
+      move(idx, dir) {
+        AudioFX.playClick();
+        const target = idx + dir;
+        if (target < 0 || target >= this.userOrder.length) return;
+        const temp = this.userOrder[idx];
+        this.userOrder[idx] = this.userOrder[target];
+        this.userOrder[target] = temp;
+        this.renderSteps();
+      },
+
+      validateOrder() {
+        let isCorrect = true;
+        for (let i = 0; i < this.correctOrder.length; i++) {
+          if (this.userOrder[i] !== this.correctOrder[i]) {
+            isCorrect = false;
+            break;
+          }
+        }
+
+        if (isCorrect) {
+          AudioFX.playSuccess();
+          GameApp.addXP(90);
+          GameApp.stampCompleted('mod5');
+          alert('🔒 PROCEDIMENTO LOTO IMPECÁVEL!\nSequência aprovada: Notificação -> Desligamento -> Bloqueio -> Etiquetagem -> Dissipação -> Teste de Energia Zero (NR-10 e NR-12).');
+          GameApp.navigate('map');
+        } else {
+          AudioFX.playError();
+          GameApp.penalizeMistake();
+          alert('❌ RISCO DE MORTE POR REENERGIZAÇÃO ACIDENTAL!\nA sequência possui etapas invertidas. O teste de energia zero só pode ser feito APÓS a dissipação das energias residuais e do bloqueio físico.');
+        }
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 6: SALA DE CRISE
+       ========================================================================== */
+    const Modality6 = {
+      stage: 1,
+      livesAtRisk: 4,
+
+      init() {
+        this.stage = 1;
+        this.livesAtRisk = 4;
+        this.renderStage();
+      },
+
+      renderStage() {
+        const svgBox = document.getElementById('m6-scene-svg');
+        const grid = document.getElementById('m6-choices-grid');
+        const meter = document.getElementById('m6-lives-meter');
+        meter.innerText = `${this.livesAtRisk} Pessoas`;
+
+        if (this.stage === 1) {
+          svgBox.innerHTML = `
+            <svg viewBox="0 0 300 120" width="100%" height="100%">
+              <rect width="300" height="120" fill="#0f172a"/>
+              <ellipse cx="150" cy="60" rx="90" ry="35" fill="rgba(250, 204, 21, 0.4)" stroke="#facc15" stroke-dasharray="4 2"/>
+              <text x="150" y="65" fill="#ef4444" font-weight="900" font-size="12" text-anchor="middle">🚨 VAZAMENTO TÓXICO</text>
+            </svg>
+          `;
+
+          grid.innerHTML = `
+            <button class="btn-industrial btn-primary-action" onclick="Modality6.decide(1, 'sirene')">📢 Acionar Sirene Geral e Evacuação no Ponto de Encontro</button>
+            <button class="btn-industrial btn-secondary" onclick="Modality6.decide(1, 'correr_resgate')">🏃 Entrar Correndo no Galpão Sem Máscara para Puxar o Colega</button>
+            <button class="btn-industrial btn-secondary" onclick="Modality6.decide(1, 'jogar_agua')">💧 Jogar Água com Mangueira Direto na Válvula de Gás</button>
+            <button class="btn-industrial btn-secondary" onclick="Modality6.decide(1, 'ignorar')">📞 Esperar 15 Minutos para Ver se o Cheiro Diminui</button>
+          `;
+        } else if (this.stage === 2) {
+          svgBox.innerHTML = `
+            <svg viewBox="0 0 300 120" width="100%" height="100%">
+              <rect width="300" height="120" fill="#0f172a"/>
+              <rect x="50" y="30" width="200" height="60" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+              <text x="150" y="65" fill="#22c55e" font-weight="bold" font-size="11" text-anchor="middle">ROTA DE FUGA SEGURA</text>
+            </svg>
+          `;
+
+          grid.innerHTML = `
+            <button class="btn-industrial btn-primary-action" onclick="Modality6.decide(2, 'brigada_epr')">👨‍🚒 Acionar Brigada com EPR Autônomo e Fechar Válvula Bloqueio</button>
+            <button class="btn-industrial btn-secondary" onclick="Modality6.decide(2, 'ventilador')">💨 Ligar Ventilador Comum de Escritório para Espalhar o Gás</button>
+          `;
+        }
+      },
+
+      decide(stage, action) {
+        if (stage === 1) {
+          if (action === 'sirene') {
+            AudioFX.playSuccess();
+            this.livesAtRisk = 1;
+            this.stage = 2;
+            this.renderStage();
+          } else {
+            AudioFX.playAlarm();
+            GameApp.penalizeMistake();
+            alert('❌ CONDUTA FATAL EM EMERGÊNCIA!\nEntrar em atmosfera tóxica de amônia sem proteção respiratória autônoma resulta em desmaio e morte imediata do socorrista (NR-33 / NR-20).');
+          }
+        } else if (stage === 2) {
+          if (action === 'brigada_epr') {
+            AudioFX.playSuccess();
+            GameApp.addXP(110);
+            GameApp.stampCompleted('mod6');
+            alert('🏆 CRISE CONTROLADA COM SUCESSO!\nBrigada equipada com Equipamento de Respiração Autônoma resgatou a vítima com vida e estancou o vazamento.');
+            GameApp.navigate('map');
+          } else {
+            AudioFX.playAlarm();
+            GameApp.penalizeMistake();
+            alert('❌ RISCO DE EXPLOSÃO!\nLigar motores elétricos não à prova de explosão em atmosfera saturada provoca ignição e explosão catastrófica.');
+          }
+        }
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 7: ARENA DE EQUIPES (JOGO EM GRUPO COMPLETO)
+       ========================================================================== */
+    const Modality7 = {
+      teams: [],
+      currentRound: 1,
+      totalRounds: 5,
+      currentScene: null,
+
+      init() {
+        if (this.teams.length === 0) {
+          this.teams = [
+            { name: 'Equipe Alfa (CIPA)', color: '#38bdf8', score: 50, bet: 10, vote: null, card: '🛡️ Escudo' },
+            { name: 'Equipe Bravo (SESMT)', color: '#facc15', score: 50, bet: 10, vote: null, card: '⚡ Dobro' },
+            { name: 'Equipe Charlie (Brigada)', color: '#ef4444', score: 50, bet: 10, vote: null, card: '💡 Dica' }
+          ];
+        }
+        this.openSetup();
+      },
+
+      openSetup() {
+        document.getElementById('m7-setup-view').style.display = 'flex';
+        document.getElementById('m7-match-view').style.display = 'none';
+        document.getElementById('m7-podium-view').style.display = 'none';
+        this.renderSetupTeams();
+      },
+
+      renderSetupTeams() {
+        const list = document.getElementById('m7-setup-teams-list');
+        list.innerHTML = this.teams.map((t, idx) => `
+          <div style="display:flex; align-items:center; gap:10px; background:#1e293b; padding:8px 12px; border-radius:6px;">
+            <input type="color" value="${t.color}" onchange="Modality7.updateTeamColor(${idx}, this.value)" style="width:36px; height:36px; border:none; background:none; cursor:pointer;">
+            <input type="text" value="${t.name}" onchange="Modality7.updateTeamName(${idx}, this.value)" style="flex:1; min-height:36px; background:#0f172a; color:#fff; border:1px solid #475569; border-radius:4px; padding:0 8px; font-weight:700;">
+            ${this.teams.length > 2 ? `<button onclick="Modality7.removeTeam(${idx})" style="background:none; border:none; color:var(--color-red); font-size:1.2rem; cursor:pointer;" title="Remover equipe">&times;</button>` : ''}
+          </div>
+        `).join('');
+      },
+
+      addTeamToSetup() {
+        if (this.teams.length >= 6) {
+          alert('Limite máximo de 6 equipes atingido.');
+          return;
+        }
+        const colors = ['#38bdf8', '#facc15', '#ef4444', '#22c55e', '#c084fc', '#fb923c'];
+        const names = ['Delta Manutenção', 'Eco Operação', 'Fox Diretoria', 'Golfe Almoxarifado'];
+        const newColor = colors[this.teams.length] || '#38bdf8';
+        const newName = names[this.teams.length - 2] || `Equipe ${this.teams.length + 1}`;
+        this.teams.push({ name: `Equipe ${newName}`, color: newColor, score: 50, bet: 10, vote: null, card: '🛡️ Escudo' });
+        this.renderSetupTeams();
+      },
+
+      removeTeam(idx) {
+        if (this.teams.length <= 2) return;
+        this.teams.splice(idx, 1);
+        this.renderSetupTeams();
+      },
+
+      updateTeamName(idx, val) {
+        if (val.trim()) this.teams[idx].name = val.trim();
+      },
+
+      updateTeamColor(idx, val) {
+        this.teams[idx].color = val;
+      },
+
+      startMatch() {
+        AudioFX.playFanfare();
+        const roundsSel = document.getElementById('m7-rounds-count');
+        this.totalRounds = parseInt(roundsSel.value) || 5;
+        this.currentRound = 1;
+        this.teams.forEach(t => { t.score = 50; t.vote = null; t.bet = 10; });
+
+        document.getElementById('m7-setup-view').style.display = 'none';
+        document.getElementById('m7-podium-view').style.display = 'none';
+        document.getElementById('m7-match-view').style.display = 'flex';
+
+        this.nextQuestion();
+      },
+
+      nextQuestion() {
+        this.teams.forEach(t => t.vote = null);
+        document.getElementById('m7-match-round-tag').innerText = `Rodada ${this.currentRound} de ${this.totalRounds}`;
+        this.currentScene = SITUATIONS_DB[Math.floor(Math.random() * SITUATIONS_DB.length)];
+        
+        const box = document.getElementById('m7-current-scene');
+        box.innerHTML = `
+          <div style="max-width:440px; width:100%;">
+            <div style="font-weight:800; font-size:1.05rem; margin-bottom:8px;">${this.currentScene.title}</div>
+            <div style="height:130px;">${this.currentScene.svgScene}</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">Norma Relacionada: <strong>${this.currentScene.nrRelated}</strong></div>
+          </div>
+        `;
+        this.renderMatchTeams();
+      },
+
+      renderMatchTeams() {
+        const container = document.getElementById('m7-teams-container');
+        container.innerHTML = this.teams.map((t, idx) => `
+          <div class="team-stand-card" style="border-top:4px solid ${t.color};">
+            <h4 style="color:${t.color}; font-size:1rem; display:flex; align-items:center; justify-content:center;">
+              <span class="team-color-indicator" style="background:${t.color};"></span>
+              ${t.name}
+            </h4>
+            <div style="font-size:1.6rem; font-weight:900; color:#fff;">${t.score} pts</div>
+
+            <div style="font-size:0.75rem; color:var(--text-muted);">Aposta da Rodada:</div>
+            <div class="team-bet-selector">
+              <button class="btn-step-move" style="${t.bet === 5 ? 'background:var(--color-blue);' : ''}" onclick="Modality7.setBet(${idx}, 5)">5</button>
+              <button class="btn-step-move" style="${t.bet === 10 ? 'background:var(--color-blue);' : ''}" onclick="Modality7.setBet(${idx}, 10)">10</button>
+              <button class="btn-step-move" style="${t.bet === 20 ? 'background:var(--color-blue);' : ''}" onclick="Modality7.setBet(${idx}, 20)">20</button>
+              <button class="btn-step-move" style="${t.bet === 50 ? 'background:var(--color-red);' : ''}" onclick="Modality7.setBet(${idx}, 50)">50</button>
+            </div>
+
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">Escolha da Equipe:</div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:4px;">
+              <button class="btn-step-move" style="${t.vote === 'verde' ? 'background:var(--color-green); color:#fff;' : ''}" onclick="Modality7.castVote(${idx}, 'verde')">🟢 VER</button>
+              <button class="btn-step-move" style="${t.vote === 'amarelo' ? 'background:var(--color-yellow); color:#000;' : ''}" onclick="Modality7.castVote(${idx}, 'amarelo')">🟡 AMA</button>
+              <button class="btn-step-move" style="${t.vote === 'vermelho' ? 'background:var(--color-red); color:#fff;' : ''}" onclick="Modality7.castVote(${idx}, 'vermelho')">🔴 VERM</button>
+            </div>
+
+            <div class="team-vote-status" style="margin-top:6px;">
+              ${t.vote ? '<span style="color:var(--color-green);">✓ Voto Travado!</span>' : '<span style="color:var(--text-muted);">Aguardando decisão...</span>'}
+            </div>
+          </div>
+        `).join('');
+      },
+
+      setBet(idx, val) {
+        AudioFX.playClick();
+        this.teams[idx].bet = val;
+        this.renderMatchTeams();
+      },
+
+      castVote(idx, color) {
+        AudioFX.playClick();
+        this.teams[idx].vote = color;
+        this.renderMatchTeams();
+      },
+
+      revealRound() {
+        const unvoted = this.teams.some(t => !t.vote);
+        if (unvoted) {
+          if (!confirm('Algumas equipes ainda não registraram seus votos. Deseja revelar mesmo assim?')) return;
+        }
+
+        let summary = `Gabarito Correto: ${this.currentScene.correct.toUpperCase()}\n\n`;
+        this.teams.forEach(t => {
+          if (t.vote === this.currentScene.correct) {
+            t.score += t.bet;
+            summary += `✅ ${t.name}: Acertou (+${t.bet} pts)\n`;
+          } else {
+            const loss = Math.round(t.bet / 2);
+            t.score = Math.max(0, t.score - loss);
+            summary += `❌ ${t.name}: Errou (-${loss} pts)\n`;
+          }
+        });
+
+        GameApp.showFeedback(this.currentScene, true, () => {
+          alert(`📊 RESULTADOS DA RODADA:\n\n${summary}`);
+          this.currentRound++;
+
+          if (this.currentRound > this.totalRounds) {
+            this.showPodium();
+          } else {
+            this.nextQuestion();
+          }
+        });
+      },
+
+      showPodium() {
+        AudioFX.playFanfare();
+        ParticleFX.triggerConfetti();
+        GameApp.stampCompleted('mod7');
+
+        document.getElementById('m7-match-view').style.display = 'none';
+        document.getElementById('m7-podium-view').style.display = 'block';
+
+        const sorted = [...this.teams].sort((a, b) => b.score - a.score);
+        const pillars = document.getElementById('m7-podium-pillars');
+
+        pillars.innerHTML = `
+          ${sorted[1] ? `
+            <div class="podium-pillar podium-2">
+              <div style="font-size:1.8rem;">🥈</div>
+              <strong>${sorted[1].name}</strong>
+              <div>${sorted[1].score} pts</div>
+              <div style="font-weight:900; font-size:1.2rem;">2º</div>
+            </div>
+          ` : ''}
+
+          <div class="podium-pillar podium-1">
+            <div style="font-size:2.4rem;">👑 🏆</div>
+            <strong>${sorted[0].name}</strong>
+            <div>${sorted[0].score} pts</div>
+            <div style="font-weight:900; font-size:1.5rem;">1º LUGAR</div>
+          </div>
+
+          ${sorted[2] ? `
+            <div class="podium-pillar podium-3">
+              <div style="font-size:1.6rem;">🥉</div>
+              <strong>${sorted[2].name}</strong>
+              <div>${sorted[2].score} pts</div>
+              <div style="font-weight:900; font-size:1.1rem;">3º</div>
+            </div>
+          ` : ''}
+        `;
+
+        const scoreboard = document.getElementById('m7-final-scoreboard');
+        scoreboard.innerHTML = `
+          <h4 style="color:var(--color-yellow); margin-bottom:8px;">Classificação Completa do Torneio:</h4>
+          <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+              <tr style="border-bottom:1px solid #475569; color:var(--color-blue);">
+                <th style="padding:6px;">Posição</th>
+                <th>Equipe</th>
+                <th>Pontuação Final</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sorted.map((t, idx) => `
+                <tr style="border-bottom:1px solid #1e293b;">
+                  <td style="padding:6px; font-weight:800;">${idx + 1}º</td>
+                  <td><span class="team-color-indicator" style="background:${t.color};"></span>${t.name}</td>
+                  <td style="color:var(--color-green); font-weight:800;">${t.score} pts</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      },
+
+      resetSetup() {
+        this.openSetup();
+      }
+    };
+
+    /* ==========================================================================
+       MODALIDADE 8: AUDITORIA FINAL
+       ========================================================================== */
+    const Modality8 = {
+      questions: [],
+      currentIndex: 0,
+      score: 0,
+
+      init() {
+        this.questions = [...SITUATIONS_DB].sort(() => Math.random() - 0.5).slice(0, 8);
+        this.currentIndex = 0;
+        this.score = 0;
+        this.renderQuestion();
+      },
+
+      renderQuestion() {
+        if (this.currentIndex >= this.questions.length) {
+          const finalScore = Math.round((this.score / 8) * 100);
+          if (finalScore >= 80) {
+            GameApp.addXP(200);
+            GameApp.stampCompleted('mod8');
+            alert(`🎉 AUDITORIA CONCLUÍDA!\nNota: ${finalScore}/100.\nVocê obteve o selo TÉCNICO DE SEGURANÇA MASTER!`);
+          } else {
+            alert(`Auditoria finalizada com nota ${finalScore}/100. São necessários no mínimo 80 pontos para o selo Master.`);
+          }
+          GameApp.endShiftSummary();
+          return;
+        }
+
+        const q = this.questions[this.currentIndex];
+        document.getElementById('m8-step-num').innerText = this.currentIndex + 1;
+        document.getElementById('m8-current-score').innerText = `${this.score * 12.5} pts`;
+        document.getElementById('m8-scene-title').innerText = q.title;
+        document.getElementById('m8-scene-desc').innerText = `Norma regulamentadora aplicável: ${q.nrRelated}. Avalie criticamente a gravidade e a conformidade técnica.`;
+        document.getElementById('m8-scene-box').innerHTML = q.svgScene;
+      },
+
+      answer(color) {
+        const q = this.questions[this.currentIndex];
+        const isRight = (q.correct === color);
+        if (isRight) {
+          this.score++;
+          GameApp.addXP(20);
+        } else {
+          GameApp.penalizeMistake(q);
+        }
+
+        GameApp.showFeedback(q, isRight, () => {
+          this.currentIndex++;
+          this.renderQuestion();
+        });
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      GameApp.init();
+    });
+  </script>
+</body>
+</html>
